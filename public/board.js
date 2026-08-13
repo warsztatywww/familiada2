@@ -206,6 +206,13 @@ let lastState = null; // najnowszy state — potrzebny w handlerze kliknięcia (
 function render(msg) {
   const { state } = msg;
   lastState = state;
+  if (state.phase !== 'final') {
+    // Pętla RAF timera finału nie może przeżyć wyjścia z widoku finału —
+    // inaczej tyka i piszczy w tle nad ukrytym #final-timer (np. po endGame
+    // w trakcie odliczania).
+    stopTimerLoop();
+    lastTimerStart = null;
+  }
   if (state.phase === 'round') {
     show('view-round');
     renderRound(state);
