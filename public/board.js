@@ -200,6 +200,9 @@ function renderGameover(state) {
     el.querySelector('.score').textContent = state.teams[t].bank;
     el.classList.toggle('winner', winner === t);
   }
+  const finalEl = $('go-final');
+  finalEl.hidden = !state.final;
+  if (state.final) $('go-final-sum').textContent = state.final.sum;
 }
 
 let lastState = null; // najnowszy state — potrzebny w handlerze kliknięcia (odblokowanie audio)

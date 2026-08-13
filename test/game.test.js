@@ -77,6 +77,14 @@ test('reveal w stage buzzers: punkty × mnożnik wpadają do sumy', () => {
   assert.equal(state.round.answers[0].revealed, true);
 });
 
+test('reveal: odrzuca nienumeryczny indeks', () => {
+  const state = freshRound(0);
+  const result = apply(state, { type: 'reveal', index: 'map' });
+  assert.equal(result, null);
+  assert.ok(state.round.answers.every((a) => !a.revealed));
+  assert.equal(state.round.sum, 0);
+});
+
 test('reveal: ponowny na tej samej odpowiedzi ignorowany', () => {
   const state = freshRound(0);
   apply(state, { type: 'reveal', index: 0 });

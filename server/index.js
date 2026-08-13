@@ -16,10 +16,17 @@ export async function startServer({ port, stateFile, questionsFile }) {
   const config = loadQuestions(questionsFile);
 
   let state;
+  let restored = false;
   if (existsSync(stateFile)) {
-    state = JSON.parse(readFileSync(stateFile, 'utf8'));
-    state.config = config; // pytania zawsze świeże z pliku
-  } else {
+    try {
+      state = JSON.parse(readFileSync(stateFile, 'utf8'));
+      state.config = config; // pytania zawsze świeże z pliku
+      restored = true;
+    } catch (e) {
+      console.error('state.json uszkodzony lub nieczytelny — skasuj plik albo przywróć kopię. Startuję nową grę.');
+    }
+  }
+  if (!restored) {
     state = createGame(config);
   }
 
@@ -45,6 +52,7 @@ export async function startServer({ port, stateFile, questionsFile }) {
   }
 
   wss.on('connection', (ws) => {
+    ws.on('error', (e) => console.error('ws error:', e.message));
     ws.send(snapshot(null));
     ws.on('message', (raw) => {
       let msg;
@@ -66,7 +74,11 @@ export async function startServer({ port, stateFile, questionsFile }) {
       const stateChanged = event !== null || wasSilentChange(cmd);
       if (!stateChanged) return;
       seq += 1;
-      writeFileSync(stateFile, JSON.stringify(state));
+      try {
+        writeFileSync(stateFile, JSON.stringify(state));
+      } catch (e) {
+        console.error('zapis state.json nieudany:', e.message);
+      }
       const data = snapshot(event);
       for (const client of wss.clients) {
         if (client.readyState === 1 /* OPEN */) client.send(data);
@@ -86,7 +98,10 @@ export async function startServer({ port, stateFile, questionsFile }) {
     return SILENT.has(cmd.type);
   }
 
-  await new Promise((resolve) => httpServer.listen(port, resolve));
+  await new Promise((resolve, reject) => {
+    httpServer.once('error', reject);
+    httpServer.listen(port, resolve);
+  });
   const actualPort = httpServer.address().port;
 
   return {
@@ -119,7 +134,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       console.log(`  http://${host}:${srv.port}/  (start: linki + QR)`);
     }
   } catch (e) {
-    console.error(e.message);
+    if (e.code === 'EADDRINUSE') {
+      console.error(`Port ${port} zajęty — zamknij drugą instancję albo ustaw PORT=inny.`);
+    } else {
+      console.error(e.message);
+    }
     process.exit(1);
   }
 }

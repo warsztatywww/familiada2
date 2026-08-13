@@ -135,8 +135,12 @@ document.addEventListener('keydown', (e) => {
     if (a) send({ type: a.revealed ? 'hide' : 'reveal', index: i });
   } else if (e.key === 'q' || e.key === 'Q') send({ type: 'strike', team: 0 });
   else if (e.key === 'w' || e.key === 'W') send({ type: 'strike', team: 1 });
-  else if (e.key === 'ArrowLeft') $('#btn-prev-round').click();
-  else if (e.key === 'ArrowRight') $('#btn-next-round').click();
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    const phase = current?.state.phase;
+    if (phase !== 'round' && phase !== 'idle') return;
+    if (e.key === 'ArrowLeft') $('#btn-prev-round').click();
+    else $('#btn-next-round').click();
+  }
 });
 
 // --- finał i korekty ---

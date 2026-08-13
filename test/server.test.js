@@ -47,6 +47,28 @@ test('serwer: snapshot na wejściu, broadcast po komendzie, persystencja', async
   rmSync(stateFile, { force: true });
 });
 
+test('serwer: uszkodzona ramka WS nie ubija procesu', async () => {
+  const stateFile = 'test-state-ws-garbage.json';
+  rmSync(stateFile, { force: true });
+
+  const srv = await startServer({ port: 0, stateFile, questionsFile: 'questions.json' });
+  const port = srv.port;
+
+  const ws = new WebSocket(`ws://127.0.0.1:${port}`);
+  await new Promise((resolve) => ws.once('open', resolve));
+  ws.on('error', () => {}); // spodziewany błąd po uszkodzonej ramce — ma nie zabić testu ani serwera
+  ws._socket.write(Buffer.from([0x77, 0x77, 0x77, 0x77, 0x77, 0x77]));
+
+  // serwer nadal odpowiada na kolejne żądanie HTTP zamiast się wywalić
+  const res = await fetch(`http://127.0.0.1:${port}/qr.svg?data=x`);
+  assert.equal(res.status, 200);
+  await res.text();
+
+  ws.terminate();
+  await srv.close();
+  rmSync(stateFile, { force: true });
+});
+
 test('serwer: /qr.svg z niepoprawnymi (za długimi) danymi zwraca 400 i nie ubija serwera', async () => {
   const stateFile = 'test-state-qr.json';
   rmSync(stateFile, { force: true });

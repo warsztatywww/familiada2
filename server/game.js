@@ -65,7 +65,7 @@ export function apply(state, cmd) {
       return { type: 'play-start', team: cmd.team };
     }
     case 'reveal': {
-      if (state.phase !== 'round') return null;
+      if (state.phase !== 'round' || !Number.isInteger(cmd.index)) return null;
       const answer = round.answers[cmd.index];
       if (!answer || answer.revealed) return null;
       if (round.stage === 'buzzers' || round.stage === 'play') {
@@ -99,7 +99,7 @@ export function apply(state, cmd) {
       return { type: 'sum-awarded', team: cmd.team };
     }
     case 'hide': {
-      if (state.phase !== 'round') return null;
+      if (state.phase !== 'round' || !Number.isInteger(cmd.index)) return null;
       const answer = round.answers[cmd.index];
       if (!answer || !answer.revealed) return null;
       if (answer.cheap) {

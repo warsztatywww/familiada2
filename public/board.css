@@ -94,10 +94,11 @@ body.disconnected::after {
 .final-panel { display: grid; gap: 2.4vh; }
 .final-row {
   display: grid;
-  grid-template-columns: 1fr 4ch 1fr 4ch;
+  grid-template-columns: minmax(0, 1fr) 4ch minmax(0, 1fr) 4ch;
   gap: 2vw; font-size: 4.6vh; line-height: 1;
   text-shadow: 0 0 12px var(--lit-glow); white-space: nowrap;
 }
+.final-row .text { overflow: hidden; }
 .final-row .pts { text-align: right; }
 .final-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 4vh; }
 #final-timer { font-size: 10vh; text-shadow: 0 0 16px var(--lit-glow); }
@@ -113,6 +114,7 @@ body.disconnected::after {
 }
 .go-team { display: flex; gap: 4vw; font-size: 9vh; text-shadow: 0 0 14px var(--lit-glow); justify-content: space-between; }
 .go-team.winner { animation: won-flash 0.7s step-end infinite; }
+.go-final { font-size: 5vh; text-align: center; text-shadow: 0 0 12px var(--lit-glow); }
 
 /* --- wielki X --- */
 #big-x {
