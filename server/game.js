@@ -153,13 +153,14 @@ export function apply(state, cmd) {
         entries: [Array(5).fill(null), Array(5).fill(null)],
         sum: 0,
         won: false,
+        covered: false,
         timer: null,
       };
       return { type: 'final-start' };
     }
     case 'finalSet': {
       const f = state.final;
-      if (state.phase !== 'final') return null;
+      if (state.phase !== 'final' || f.covered) return null;
       const { qIndex, player, answerIndex } = cmd;
       if (!isTeam(player) || !f.questions[qIndex] || f.entries[player][qIndex] !== null) return null;
       if (answerIndex !== null) {
@@ -175,6 +176,12 @@ export function apply(state, cmd) {
         return { type: 'final-win' };
       }
       return { type: 'final-reveal', qIndex, player };
+    }
+    case 'finalCover': {
+      // Zakrycie odpowiedzi na tablicy na czas wejścia gracza 2. Komenda cicha.
+      if (state.phase !== 'final' || typeof cmd.covered !== 'boolean') return null;
+      state.final.covered = cmd.covered;
+      return null;
     }
     case 'finalClear': {
       const f = state.final;

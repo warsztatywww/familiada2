@@ -67,6 +67,7 @@ function render(state) {
   $('#final-card').hidden = state.phase !== 'final';
   if (state.phase === 'final') {
     $('#final-sum-host').textContent = f.sum;
+    $('#btn-final-cover').textContent = f.covered ? 'ODKRYJ TABLICĘ' : 'ZAKRYJ TABLICĘ';
     $('#final-questions').innerHTML = f.questions.map((q, qi) => {
       const player = (p) => {
         const entry = f.entries[p][qi];
@@ -80,10 +81,10 @@ function render(state) {
         }
         const buttons = q.answers.map((a, ai) => {
           const used = otherEntry && otherEntry.answerIndex === ai;
-          return `<button data-q="${qi}" data-p="${p}" data-a="${ai}" class="${used ? 'used' : ''}" ${used ? 'disabled' : ''}>${a.text} (${a.points})</button>`;
+          return `<button data-q="${qi}" data-p="${p}" data-a="${ai}" class="${used ? 'used' : ''}" ${used || f.covered ? 'disabled' : ''}>${a.text} (${a.points})</button>`;
         }).join('');
         return `<div class="player"><span>Gracz ${p + 1}</span>${buttons}` +
-          `<button data-q="${qi}" data-p="${p}" data-a="null">PUDŁO — 0 pkt</button></div>`;
+          `<button data-q="${qi}" data-p="${p}" data-a="null" ${f.covered ? 'disabled' : ''}>PUDŁO — 0 pkt</button></div>`;
       };
       return `<div class="final-q"><h4>${qi + 1}. ${q.question}</h4><div class="players">${player(0)}${player(1)}</div></div>`;
     }).join('');
@@ -161,6 +162,7 @@ $('#btn-timer-15').onclick = () => send({ type: 'timerStart', seconds: 15, playe
 $('#btn-timer-20').onclick = () => send({ type: 'timerStart', seconds: 20, player: 2 });
 $('#btn-timer-stop').onclick = () => send({ type: 'timerStop' });
 $('#btn-repeat').onclick = () => send({ type: 'repeatBuzzer' });
+$('#btn-final-cover').onclick = () => send({ type: 'finalCover', covered: !current.state.final.covered });
 for (const row of document.querySelectorAll('#fix-card .row')) {
   const t = Number(row.dataset.team);
   row.querySelector('.btn-apply').onclick = () => {

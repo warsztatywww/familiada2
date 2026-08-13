@@ -163,7 +163,7 @@ function renderIntro(state) {
 
 function finalCell(f, player, qIndex) {
   const entry = f.entries[player][qIndex];
-  if (entry === null) return `<span class="text">${'-'.repeat(12)}</span><span class="pts">--</span>`;
+  if (f.covered || entry === null) return `<span class="text">${'-'.repeat(12)}</span><span class="pts">--</span>`;
   if (entry.answerIndex === null) return `<span class="text">${'—'.repeat(6)}</span><span class="pts">0</span>`;
   const a = f.questions[qIndex].answers[entry.answerIndex];
   return `<span class="text">${a.text}</span><span class="pts">${a.points}</span>`;

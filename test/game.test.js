@@ -368,6 +368,39 @@ test('finalClear: cofa wpis i przelicza sumę', () => {
   assert.equal(state.final.entries[0][0], null);
 });
 
+test('finalCover: przełącza zakrycie tylko w finale', () => {
+  const state = freshFinal();
+  assert.equal(state.final.covered, false);
+  assert.equal(apply(state, { type: 'finalCover', covered: true }), null); // komenda cicha
+  assert.equal(state.final.covered, true);
+  apply(state, { type: 'finalCover', covered: false });
+  assert.equal(state.final.covered, false);
+});
+
+test('finalCover: odrzucany poza finałem i bez boolean', () => {
+  const state = freshRound(0);
+  assert.equal(apply(state, { type: 'finalCover', covered: true }), null);
+  assert.equal(state.final, null);
+  const f = freshFinal();
+  apply(f, { type: 'finalCover', covered: 'tak' });
+  assert.equal(f.final.covered, false);
+});
+
+test('finalSet: odrzucany przy zakrytej tablicy', () => {
+  const state = freshFinal();
+  apply(state, { type: 'finalCover', covered: true });
+  assert.equal(apply(state, { type: 'finalSet', qIndex: 0, player: 0, answerIndex: 0 }), null);
+  assert.equal(state.final.sum, 0);
+  assert.equal(state.final.entries[0][0], null);
+});
+
+test('covered przeżywa round-trip JSON (persystencja)', () => {
+  const state = freshFinal();
+  apply(state, { type: 'finalCover', covered: true });
+  const restored = JSON.parse(JSON.stringify(state));
+  assert.equal(restored.final.covered, true);
+});
+
 test('timer: start i stop', () => {
   const state = freshFinal();
   const ev = apply(state, { type: 'timerStart', seconds: 15, now: 1000000 });

@@ -96,7 +96,7 @@ export async function startServer({ port, stateFile, questionsFile }) {
   // idempotentny, nadmiarowy broadcast jest nieszkodliwy).
   const SILENT = new Set([
     'hide', 'unstrike', 'setBank', 'setTeamName', 'finalClear', 'timerStop',
-    'introVideoEnded', 'stopMusic', 'resetBuzzers',
+    'introVideoEnded', 'stopMusic', 'resetBuzzers', 'finalCover',
   ]);
   function wasSilentChange(cmd) {
     return SILENT.has(cmd.type);
