@@ -48,7 +48,7 @@ button.danger { background: #3a1717; border-color: #7a1f1f; }
 .final-q h4 { font-size: 16px; }
 .final-q .players { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .final-q .player { display: grid; gap: 6px; }
-.final-q .player > span { color: var(--muted); font-size: 13px; }
+.final-q .player > span:not(.chosen) { color: var(--muted); font-size: 13px; }
 .final-q button { min-height: 44px; font-size: 14px; }
 .final-q button.used { opacity: 0.35; text-decoration: line-through; }
 .final-q .chosen {
