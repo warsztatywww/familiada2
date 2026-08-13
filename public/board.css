@@ -57,24 +57,118 @@ body.disconnected::after {
 #intro-video { width: 100vw; height: 100vh; object-fit: contain; }
 /* Logo WWW nad napisem FAMILIADA z ostatniej klatki czołówki; widoczne tylko
    w stanie 'music' (po zakończeniu wideo). Pozycja zakłada ekran 16:9 zgodny
-   z proporcjami wideo (object-fit: contain wypełnia wtedy cały viewport). */
-#intro-logo {
+   z proporcjami wideo (object-fit: contain wypełnia wtedy cały viewport).
+
+   Choreografia (start liczony od --logo-delay po końcu wideo):
+   1. wlot: logo nadlatuje z głębi wirując, rozmyte ruchem; obrót wygasa
+      w połowie lotu, żeby finałowy doskok szedł już prosto na widza,
+   2. uderzenie (62% logo-slam): przerost skali + błysk + rozbłysk za logo,
+   3. osadzenie: sprężysty powrót do skali 1,
+   4. pętla: oddychająca poświata + co kilka sekund refleks świetlny
+      przelatujący po literach (maska z tego samego SVG). */
+#intro-logo-wrap {
+  --logo-delay: 1.5s;
   position: absolute;
   left: 50%; top: 52%;
   transform: translate(-50%, -50%);
   width: 55vw;
-  opacity: 0;
   pointer-events: none;
 }
+#intro-logo { display: block; width: 100%; opacity: 0; }
 #view-intro.logo-visible #intro-logo {
-  opacity: 1;
-  filter: drop-shadow(0 0 1.2vh rgba(255, 244, 200, 0.6));
-  animation: logo-flash 1.4s ease-out;
+  animation:
+    logo-slam 1.6s linear var(--logo-delay) both,
+    logo-glow 2.6s ease-in-out calc(var(--logo-delay) + 1.6s) infinite alternate;
 }
-@keyframes logo-flash {
-  0%   { opacity: 0; filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0)) brightness(3); }
-  15%  { opacity: 1; filter: drop-shadow(0 0 6vh rgba(255, 255, 255, 0.95)) brightness(2.5); }
-  100% { opacity: 1; filter: drop-shadow(0 0 1.2vh rgba(255, 244, 200, 0.6)) brightness(1); }
+/* Rozbłysk (elipsa światła) za logo w momencie uderzenia. */
+#intro-logo-wrap::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 120%; height: 400%;
+  transform: translate(-50%, -50%) scale(0.3);
+  background: radial-gradient(closest-side, rgba(255, 250, 220, 0.85), rgba(255, 244, 200, 0.3) 45%, transparent 70%);
+  opacity: 0;
+}
+#view-intro.logo-visible #intro-logo-wrap::before {
+  /* 0.99s = moment uderzenia (62% z 1.6s logo-slam) */
+  animation: logo-burst 0.8s ease-out calc(var(--logo-delay) + 0.99s);
+}
+/* Refleks: pasek światła przycięty maską do kształtu liter logo. Złote
+   ramiona wokół białego rdzenia — czysta biel na kremowych literach byłaby
+   niewidoczna, złoto czyta się jak światło ślizgające się po metalu. */
+#intro-logo-shine {
+  position: absolute; inset: 0;
+  -webkit-mask: url(/assets/images/logo-www.svg) center / contain no-repeat;
+  mask: url(/assets/images/logo-www.svg) center / contain no-repeat;
+}
+#intro-logo-shine::before {
+  content: '';
+  position: absolute;
+  top: -30%; bottom: -30%; left: -35%; width: 35%;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 195, 70, 0.55) 25%, #fff 50%, rgba(255, 195, 70, 0.55) 75%, transparent);
+  opacity: 0;
+}
+#view-intro.logo-visible #intro-logo-shine::before {
+  animation: logo-shine 4.5s ease-in-out calc(var(--logo-delay) + 2s) infinite;
+}
+@keyframes logo-slam {
+  0% {
+    opacity: 0;
+    transform: scale(0.02) rotate(-900deg);
+    filter: blur(1.2vh) brightness(3) drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  }
+  10% {
+    opacity: 1;
+    transform: scale(0.06) rotate(-780deg);
+    filter: blur(1.2vh) brightness(3) drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+    animation-timing-function: cubic-bezier(0.25, 0.6, 0.45, 1); /* obrót wygasa */
+  }
+  45% {
+    opacity: 1;
+    transform: scale(0.3) rotate(0deg);
+    filter: blur(0.5vh) brightness(3) drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+    animation-timing-function: cubic-bezier(0.7, 0, 0.9, 0.5); /* prosty doskok na widza */
+  }
+  62% {
+    opacity: 1;
+    transform: scale(1.24) rotate(0deg);
+    filter: blur(0) brightness(2.8) drop-shadow(0 0 8vh rgba(255, 255, 255, 0.95));
+    animation-timing-function: cubic-bezier(0.3, 1.4, 0.5, 1); /* sprężyste hamowanie */
+  }
+  76% {
+    transform: scale(0.95) rotate(0deg);
+    filter: blur(0) brightness(1.5) drop-shadow(0 0 3vh rgba(255, 250, 220, 0.8));
+  }
+  88% { transform: scale(1.04) rotate(0deg); }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter: blur(0) brightness(1) drop-shadow(0 0 1.2vh rgba(255, 244, 200, 0.6));
+  }
+}
+@keyframes logo-glow {
+  from { filter: blur(0) brightness(1) drop-shadow(0 0 1.2vh rgba(255, 244, 200, 0.55)); }
+  to   { filter: blur(0) brightness(1.18) drop-shadow(0 0 3vh rgba(255, 244, 200, 0.85)); }
+}
+@keyframes logo-burst {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+  20%  { opacity: 0.9; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+}
+@keyframes logo-shine {
+  0%        { opacity: 1; transform: translateX(0) skewX(-20deg); }
+  30%, 100% { opacity: 1; transform: translateX(490%) skewX(-20deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #view-intro.logo-visible #intro-logo { animation: logo-fade 0.8s ease var(--logo-delay) both; }
+  #view-intro.logo-visible #intro-logo-wrap::before,
+  #view-intro.logo-visible #intro-logo-shine::before { animation: none; }
+}
+@keyframes logo-fade {
+  from { opacity: 0; filter: drop-shadow(0 0 1.2vh rgba(255, 244, 200, 0.6)); }
+  to   { opacity: 1; filter: drop-shadow(0 0 1.2vh rgba(255, 244, 200, 0.6)); }
 }
 
 /* --- scena: ciemne studio z poświatą czerwoną (lewa) i niebieską (prawa) --- */
