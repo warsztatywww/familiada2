@@ -101,27 +101,6 @@ export function apply(state, cmd) {
       awardSumTo(state, cmd.team);
       return { type: 'sum-awarded', team: cmd.team };
     }
-    case 'hide': {
-      if (state.phase !== 'round' || !Number.isInteger(cmd.index)) return null;
-      const answer = round.answers[cmd.index];
-      if (!answer || !answer.revealed) return null;
-      if (answer.cheap) {
-        answer.revealed = false;
-        answer.cheap = false;
-        return null;
-      }
-      if (round.stage === 'done' || round.stage === 'steal') return null;
-      answer.revealed = false;
-      round.sum -= answer.points * round.multiplier;
-      return null;
-    }
-    case 'unstrike': {
-      if (state.phase !== 'round' || !isTeam(cmd.team)) return null;
-      if (round.strikes[cmd.team] <= 0) return null;
-      round.strikes[cmd.team] -= 1;
-      if (round.stage === 'steal' && cmd.team === round.playingTeam) round.stage = 'play';
-      return null;
-    }
     case 'setBank': {
       if (!isTeam(cmd.team) || !Number.isInteger(cmd.value) || cmd.value < 0) return null;
       state.teams[cmd.team].bank = cmd.value;
@@ -181,18 +160,6 @@ export function apply(state, cmd) {
       // Zakrycie odpowiedzi na tablicy na czas wejścia gracza 2. Komenda cicha.
       if (state.phase !== 'final' || typeof cmd.covered !== 'boolean') return null;
       state.final.covered = cmd.covered;
-      return null;
-    }
-    case 'finalClear': {
-      const f = state.final;
-      if (state.phase !== 'final') return null;
-      const entry = f?.entries[cmd.player]?.[cmd.qIndex];
-      if (!entry) return null;
-      if (entry.answerIndex !== null) {
-        f.sum -= f.questions[cmd.qIndex].answers[entry.answerIndex].points;
-      }
-      f.entries[cmd.player][cmd.qIndex] = null;
-      f.won = f.sum >= 200;
       return null;
     }
     case 'timerStart': {

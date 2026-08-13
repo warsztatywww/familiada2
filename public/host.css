@@ -51,5 +51,8 @@ button.danger { background: #3a1717; border-color: #7a1f1f; }
 .final-q .player > span { color: var(--muted); font-size: 13px; }
 .final-q button { min-height: 44px; font-size: 14px; }
 .final-q button.used { opacity: 0.35; text-decoration: line-through; }
-.final-q button.chosen { background: #1d3021; border-color: #2f7a3d; }
+.final-q .chosen {
+  background: #1d3021; border: 1px solid #2f7a3d; border-radius: 10px;
+  display: inline-block; padding: 0.4rem 0.6rem;
+}
 input { min-height: 44px; background: #0d0f13; border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 0 10px; font-size: 16px; }

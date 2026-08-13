@@ -207,31 +207,19 @@ test('tanie odkrycie po rundzie: bez punktów', () => {
   assert.equal(state.teams[0].bank, 50); // bez zmian
 });
 
-test('hide: cofa odkrycie i punkty przed rozstrzygnięciem', () => {
+test('usunięte komendy hide/unstrike/finalClear są odrzucane', () => {
   const state = freshRound(0);
+  apply(state, { type: 'choosePlayingTeam', team: 0 });
   apply(state, { type: 'reveal', index: 0 });
+  apply(state, { type: 'strike', team: 0 });
   assert.equal(apply(state, { type: 'hide', index: 0 }), null);
-  assert.equal(state.round.sum, 0);
-  assert.equal(state.round.answers[0].revealed, false);
-});
-
-test('hide po rozstrzygnięciu: działa tylko na tanich odkryciach', () => {
-  const state = playedToSteal();
-  apply(state, { type: 'stealFail' });
-  apply(state, { type: 'reveal', index: 2 }); // cheap
-  assert.equal(state.round.answers[2].revealed, true);
-  apply(state, { type: 'hide', index: 2 });
-  assert.equal(state.round.answers[2].revealed, false);
-  // odkrycie punktowane z czasu gry — nietykalne po 'done'
-  apply(state, { type: 'hide', index: 0 });
+  assert.equal(apply(state, { type: 'unstrike', team: 0 }), null);
   assert.equal(state.round.answers[0].revealed, true);
-});
-
-test('unstrike: cofa X i wychodzi z przejęcia', () => {
-  const state = playedToSteal();
-  apply(state, { type: 'unstrike', team: 0 });
-  assert.deepEqual(state.round.strikes, [2, 0]);
-  assert.equal(state.round.stage, 'play');
+  assert.equal(state.round.strikes[0], 1);
+  const f = freshFinal();
+  apply(f, { type: 'finalSet', qIndex: 0, player: 0, answerIndex: 0 });
+  assert.equal(apply(f, { type: 'finalClear', qIndex: 0, player: 0 }), null);
+  assert.equal(f.final.sum, 90);
 });
 
 test('awardSum: ręczne przyznanie', () => {
@@ -280,14 +268,6 @@ test('setTeamName: odrzuca non-string', () => {
   const result = apply(state, { type: 'setTeamName', team: 0, name: 123 });
   assert.equal(result, null);
   assert.equal(state.teams[0].name, initialName);
-});
-
-test('unstrike: zwraca null gdy strikes === 0', () => {
-  const state = freshRound(0);
-  apply(state, { type: 'choosePlayingTeam', team: 0 });
-  const result = apply(state, { type: 'unstrike', team: 0 });
-  assert.equal(result, null);
-  assert.equal(state.round.strikes[0], 0);
 });
 
 test('awardSum: zwraca null gdy stage === done', () => {
@@ -358,14 +338,6 @@ test('finał: suma >= 200 daje final-win', () => {
   const ev = apply(state, { type: 'finalSet', qIndex: 2, player: 0, answerIndex: 0 }); // 70 -> 240
   assert.equal(ev.type, 'final-win');
   assert.equal(state.final.won, true);
-});
-
-test('finalClear: cofa wpis i przelicza sumę', () => {
-  const state = freshFinal();
-  apply(state, { type: 'finalSet', qIndex: 0, player: 0, answerIndex: 0 });
-  apply(state, { type: 'finalClear', qIndex: 0, player: 0 });
-  assert.equal(state.final.sum, 0);
-  assert.equal(state.final.entries[0][0], null);
 });
 
 test('finalCover: przełącza zakrycie tylko w finale', () => {

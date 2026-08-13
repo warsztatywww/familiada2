@@ -115,7 +115,7 @@ export async function startServer({ port, stateFile, questionsFile }) {
   // prostoty rozgłaszamy każdą znaną komendę cichą bezwarunkowo (snapshot
   // idempotentny, nadmiarowy broadcast jest nieszkodliwy).
   const SILENT = new Set([
-    'hide', 'unstrike', 'setBank', 'setTeamName', 'finalClear', 'timerStop',
+    'setBank', 'setTeamName', 'timerStop',
     'introVideoEnded', 'stopMusic', 'resetBuzzers', 'finalCover',
   ]);
   function wasSilentChange(cmd) {

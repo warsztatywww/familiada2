@@ -51,7 +51,6 @@ function render(msg) {
       (r.stage !== 'buzzers' && r.stage !== 'play') ||
       (r.stage === 'play' && t !== r.playingTeam);
     box.querySelector('.btn-award').disabled = !inRound || (r.stage !== 'play' && r.stage !== 'steal');
-    box.querySelector('.btn-unstrike').disabled = !inRound || r.strikes[t] === 0;
   }
 
   $('#buzzer-status').textContent = !inRound ? '' :
@@ -77,8 +76,7 @@ function render(msg) {
           const label = entry.answerIndex === null
             ? 'PUDŁO (0 pkt)'
             : `${q.answers[entry.answerIndex].text} (${q.answers[entry.answerIndex].points})`;
-          return `<div class="player"><span>Gracz ${p + 1}</span>` +
-            `<button class="chosen" data-clear data-q="${qi}" data-p="${p}">${label} — cofnij</button></div>`;
+          return `<div class="player"><span>Gracz ${p + 1}</span><span class="chosen">${label}</span></div>`;
         }
         const buttons = q.answers.map((a, ai) => {
           const used = otherEntry && otherEntry.answerIndex === ai;
@@ -113,15 +111,12 @@ function render(msg) {
 $('#host-answers').addEventListener('click', (e) => {
   const btn = e.target.closest('button.answer');
   if (!btn) return;
-  const i = Number(btn.dataset.index);
-  const a = current.state.round.answers[i];
-  send({ type: a.revealed ? 'hide' : 'reveal', index: i });
+  send({ type: 'reveal', index: Number(btn.dataset.index) });
 });
 
 for (const box of document.querySelectorAll('.team-box')) {
   const t = Number(box.dataset.team);
   box.querySelector('.btn-strike').onclick = () => send({ type: 'strike', team: t });
-  box.querySelector('.btn-unstrike').onclick = () => send({ type: 'unstrike', team: t });
   box.querySelector('.btn-play').onclick = () => send({ type: 'choosePlayingTeam', team: t });
   box.querySelector('.btn-award').onclick = () => send({ type: 'awardSum', team: t });
 }
@@ -146,9 +141,7 @@ $('#btn-final').onclick = () => send({ type: 'startFinal' });
 document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT') return;
   if (e.key >= '1' && e.key <= '6') {
-    const i = Number(e.key) - 1;
-    const a = current?.state.round?.answers[i];
-    if (a) send({ type: a.revealed ? 'hide' : 'reveal', index: i });
+    send({ type: 'reveal', index: Number(e.key) - 1 });
   } else if (e.key === 'q' || e.key === 'Q') send({ type: 'strike', team: 0 });
   else if (e.key === 'w' || e.key === 'W') send({ type: 'strike', team: 1 });
   else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
@@ -165,7 +158,6 @@ $('#final-questions').addEventListener('click', (e) => {
   if (!btn) return;
   const qIndex = Number(btn.dataset.q);
   const player = Number(btn.dataset.p);
-  if (btn.hasAttribute('data-clear')) return send({ type: 'finalClear', qIndex, player });
   const answerIndex = btn.dataset.a === 'null' ? null : Number(btn.dataset.a);
   send({ type: 'finalSet', qIndex, player, answerIndex });
 });

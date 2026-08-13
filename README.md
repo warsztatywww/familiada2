@@ -44,7 +44,7 @@ być odblokowany dla połączeń przychodzących z sieci lokalnej.
 
 | Klawisz   | Akcja                                            |
 |-----------|---------------------------------------------------|
-| `1`–`6`   | odkryj / schowaj odpowiedź o danym numerze         |
+| `1`–`6`   | odkryj odpowiedź o danym numerze (cofanie: ⟲ COFNIJ) |
 | `Q`       | X dla drużyny lewej                                |
 | `W`       | X dla drużyny prawej                               |
 | `←`       | poprzednia runda                                   |
@@ -57,13 +57,19 @@ Skróty są nieaktywne, gdy fokus jest w polu tekstowym (np. w sekcji
 
 - **Intro** — odpala wideo czołówki, po nim leci muzyka w tle na tablicy.
 - **Stop muzykę** — ucina muzykę intra.
-- **+ X / − X** (na drużynę) — dodaje/cofa przewinienie (odpowiednik `Q`/`W`).
+- **+ X** (na drużynę) — dodaje przewinienie (odpowiednik `Q`/`W`); w grze
+  właściwej aktywny tylko dla drużyny grającej.
+- **SUMA DLA NICH** (na drużynę) — ręczne przyznanie sumy rundy do banku.
+- **⟲ COFNIJ / ⟳ PONÓW** — globalne cofnięcie ostatniej akcji (etykieta na
+  przycisku mówi, co zostanie cofnięte); zastępuje dawne `− X`, chowanie
+  odpowiedzi i „cofnij" w finale. Historia żyje w pamięci serwera — restart
+  serwera ją czyści (gra trwa dalej).
 - **GRA TA DRUŻYNA** — wybór drużyny grającej po naciśnięciu buzzera.
 - **Uzbrój buzzery ponownie** — reset buzzerów w danej rundzie (np. po
   nieważnym starcie).
 - **PRZEJĘCIE: PUDŁO** — drużyna przejmująca nie zgadła, suma zostaje przy
   drużynie grającej.
-- **Odpowiedzi 1–6 na liście** — klik odkrywa/chowa (jak `1`–`6`).
+- **Odpowiedzi 1–6 na liście** — klik odkrywa (jak `1`–`6`).
 - **◀ Poprzednia / Nowa runda / Następna ▶** — nawigacja po rundach.
 - **Finał** — start rundy finałowej (aktywny tylko, gdy plik pytań ma
   dokładnie 5 pytań finałowych).
@@ -72,6 +78,8 @@ Skróty są nieaktywne, gdy fokus jest w polu tekstowym (np. w sekcji
 - W sekcji finału: **Start 15 s / 20 s** uruchamia timer gracza, **Stop
   timera** go zatrzymuje, **POWTÓRZONA!** sygnalizuje odpowiedź do
   powtórzenia (dźwięk błędu, bez zmiany stanu).
+  **ZAKRYJ/ODKRYJ TABLICĘ** chowa odpowiedzi gracza 1 na czas wejścia
+  gracza 2 (SUMA zostaje widoczna).
 - **Korekty** (rozwijana sekcja) — ręczna zmiana nazwy drużyny i wartości
   banku, na wypadek pomyłki.
 
@@ -160,10 +168,10 @@ Ręczna checklista do przejścia przed każdym większym wydarzeniem:
 3. Intro → wideo, po nim plansza + muzyka w tle; „Stop muzykę" ucina.
 4. Nowa runda → buzzery aktywne; tap na buzzerze → „TY!" na tym buzzerze i
    dźwięk dzwonków na tablicy.
-5. Odkrycia (`1`–`6`), X-y (`Q`/`W`), przejęcie, przyznanie sumy do banku
-   — dźwięki i tablica spójne ze stanem panelu.
+5. Odkrycia (`1`–`6`), X-y (`Q`/`W`), przejęcie, przyznanie sumy do banku,
+   ⟲ COFNIJ ostatniej akcji — dźwięki i tablica spójne ze stanem panelu.
 6. Finał: timery (15 s / 20 s), „POWTÓRZONA!", wygrana przy sumie ≥ 200 →
-   plansza „brawo".
+   plansza „brawo", zakrycie i odkrycie tablicy przy wejściu gracza 2.
 7. Zabij serwer (Ctrl+C), `npm start` — gra wraca w tym samym miejscu,
    klienci (tablica/panel/buzzery) sami się łączą ponownie.
 8. „Nowa gra" → wszystko wyzerowane (banki, rundy, finał).
