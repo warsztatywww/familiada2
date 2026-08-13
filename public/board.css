@@ -84,6 +84,36 @@ body.disconnected::after {
 .side.buzzed .buzzed-marker { visibility: visible; animation: blink 0.8s step-end infinite; }
 @keyframes blink { 50% { opacity: 0.2; } }
 
+/* --- finał --- */
+#view-final {
+  display: grid; place-content: center; gap: 3vh; padding: 4vh 3vw;
+  background:
+    radial-gradient(circle, var(--unlit) 1.2px, transparent 1.4px) 0 0 / 6px 6px,
+    var(--board-bg);
+}
+.final-panel { display: grid; gap: 2.4vh; }
+.final-row {
+  display: grid;
+  grid-template-columns: 1fr 4ch 1fr 4ch;
+  gap: 2vw; font-size: 4.6vh; line-height: 1;
+  text-shadow: 0 0 12px var(--lit-glow); white-space: nowrap;
+}
+.final-row .pts { text-align: right; }
+.final-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 4vh; }
+#final-timer { font-size: 10vh; text-shadow: 0 0 16px var(--lit-glow); }
+#view-final.won { animation: won-flash 0.7s step-end infinite; }
+@keyframes won-flash { 50% { filter: brightness(1.6); } }
+
+/* --- koniec gry --- */
+#view-gameover {
+  display: grid; place-content: center; gap: 6vh;
+  background:
+    radial-gradient(circle, var(--unlit) 1.2px, transparent 1.4px) 0 0 / 6px 6px,
+    var(--board-bg);
+}
+.go-team { display: flex; gap: 4vw; font-size: 9vh; text-shadow: 0 0 14px var(--lit-glow); justify-content: space-between; }
+.go-team.winner { animation: won-flash 0.7s step-end infinite; }
+
 /* --- wielki X --- */
 #big-x {
   position: fixed; inset: 0; display: grid; place-items: center;

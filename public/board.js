@@ -136,6 +136,72 @@ function renderIntro(state) {
   // widok dla 'music' przełącza render() (pusta plansza)
 }
 
+// --- finał ---
+
+function finalCell(f, player, qIndex) {
+  const entry = f.entries[player][qIndex];
+  if (entry === null) return `<span class="text">${'-'.repeat(12)}</span><span class="pts">--</span>`;
+  if (entry.answerIndex === null) return `<span class="text">${'—'.repeat(6)}</span><span class="pts">0</span>`;
+  const a = f.questions[qIndex].answers[entry.answerIndex];
+  return `<span class="text">${a.text}</span><span class="pts">${a.points}</span>`;
+}
+
+function renderFinal(msg) {
+  const f = msg.state.final;
+  $('final-rows').innerHTML = f.questions
+    .map((q, i) => `<div class="final-row">${finalCell(f, 0, i)}${finalCell(f, 1, i)}</div>`)
+    .join('');
+  $('final-sum').textContent = f.sum;
+  document.getElementById('view-final').classList.toggle('won', f.won);
+
+  const timerEl = $('final-timer');
+  if (f.timer) {
+    timerEl.hidden = false;
+    if (f.timer.startedAt !== lastTimerStart) {
+      lastTimerStart = f.timer.startedAt;
+      startTimerLoop(f.timer, msg.now);
+    }
+  } else {
+    timerEl.hidden = true;
+    lastTimerStart = null;
+    stopTimerLoop();
+  }
+}
+
+let timerRAF = null;
+let timerDone = false;
+let lastTimerStart = null; // startedAt ostatnio uruchomionego timera — nie restartuj pętli RAF bez zmiany
+function startTimerLoop(timer, serverNow) {
+  const offset = Date.now() - serverNow; // korekta zegara klienta
+  cancelAnimationFrame(timerRAF);
+  timerDone = false;
+  const tick = () => {
+    const elapsed = (Date.now() - offset - timer.startedAt) / 1000;
+    const remaining = Math.max(0, Math.ceil(timer.duration - elapsed));
+    $('final-timer').textContent = remaining;
+    if (remaining === 0 && !timerDone) {
+      timerDone = true;
+      beep(220, 700);
+    }
+    if (remaining > 0) timerRAF = requestAnimationFrame(tick);
+  };
+  tick();
+}
+function stopTimerLoop() { cancelAnimationFrame(timerRAF); }
+
+// --- koniec gry ---
+
+function renderGameover(state) {
+  const winner = state.teams[0].bank === state.teams[1].bank ? null
+    : state.teams[0].bank > state.teams[1].bank ? 0 : 1;
+  for (const t of [0, 1]) {
+    const el = $(`go-team-${t}`);
+    el.querySelector('.name').textContent = state.teams[t].name;
+    el.querySelector('.score').textContent = state.teams[t].bank;
+    el.classList.toggle('winner', winner === t);
+  }
+}
+
 let lastState = null; // najnowszy state — potrzebny w handlerze kliknięcia (odblokowanie audio)
 function render(msg) {
   const { state } = msg;
@@ -152,12 +218,17 @@ function render(msg) {
       show('view-round');
       renderEmptyBoard(state);
     }
+  } else if (state.phase === 'final') {
+    show('view-final');
+    renderFinal(msg);
+  } else if (state.phase === 'gameover') {
+    show('view-gameover');
+    renderGameover(state);
   }
   if (state.phase !== 'idle') {
     $('snd-intro').pause();
     introShown = null;
   }
-  // 'final' i 'gameover' — Task 10
 }
 
 const game = connectGame((msg) => {
