@@ -20,6 +20,9 @@ i kodami QR do wszystkich widoków:
   włącz pełny ekran (**F11** w przeglądarce).
 - **Panel prowadzącego:** `/host` — otwórz z laptopa albo tabletu w tej
   samej sieci.
+- **Scena (prowadzący):** `/stage` — widok na telefon prowadzącego
+  występującego na scenie: aktualne pytanie, kto się wbił na buzzerze
+  i która drużyna odpowiada (w finale — lista 5 pytań).
 - **Buzzery:** `/buzzer/1` (drużyna lewa) i `/buzzer/2` (drużyna prawa) —
   najwygodniej otworzyć telefonem/tabletem, skanując kod QR ze strony
   startowej.

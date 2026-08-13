@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Familiada — scena</title>
+<style>
+  * { margin: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: #111318; color: #e8eaf0;
+    font-family: system-ui, sans-serif;
+    display: grid; grid-template-rows: 1fr auto;
+    user-select: none; -webkit-user-select: none;
+  }
+  body.disconnected::before {
+    content: 'ŁĄCZĘ…'; position: fixed; top: 12px; left: 0; right: 0;
+    font-size: 16px; color: #ffb300; text-align: center;
+  }
+  main { display: grid; align-content: safe center; justify-content: center; padding: 6vw; gap: 6vw; overflow-y: auto; }
+  #question { font-size: 8vw; font-weight: 800; line-height: 1.25; text-align: center; }
+  #question.muted { color: #8a93a5; font-weight: 400; }
+  ol { display: grid; gap: 4vw; padding-left: 8vw; font-size: 5.5vw; font-weight: 600; line-height: 1.3; }
+  [hidden] { display: none !important; }
+  #status {
+    padding: 4vw; font-size: 5vw; font-weight: 700; text-align: center;
+    background: #1a1e26; border-top: 1px solid #2a2f3a; min-height: 1em;
+  }
+  #status.team-0 { background: #3d8bfd; color: #fff; }
+  #status.team-1 { background: #ff4d4d; color: #fff; }
+</style>
+</head>
+<body>
+<main>
+  <div id="question" class="muted">Czekamy na rozpoczęcie…</div>
+  <ol id="final" hidden></ol>
+</main>
+<div id="status"></div>
+<script type="module">
+  import { connectGame } from '/common/ws.js';
+  const questionEl = document.getElementById('question');
+  const finalEl = document.getElementById('final');
+  const statusEl = document.getElementById('status');
+
+  function setQuestion(text, muted) {
+    questionEl.textContent = text;
+    questionEl.classList.toggle('muted', muted);
+    questionEl.hidden = !text;
+  }
+
+  function setStatus(text, team = null) {
+    statusEl.textContent = text;
+    statusEl.className = team === null ? '' : `team-${team}`;
+  }
+
+  connectGame(({ state }) => {
+    const { round, teams } = state;
+    finalEl.hidden = state.phase !== 'final';
+    if (state.phase === 'round') {
+      setQuestion(round.question, false);
+      if (round.stage === 'buzzers') {
+        if (round.buzzed === null) setStatus('🔔 Buzzery — czekamy…');
+        else setStatus(`🔔 Wbili się: ${teams[round.buzzed].name}`, round.buzzed);
+      } else if (round.stage === 'play') {
+        setStatus(`Odpowiada: ${teams[round.playingTeam].name}`, round.playingTeam);
+      } else if (round.stage === 'steal') {
+        const stealing = 1 - round.playingTeam;
+        setStatus(`Przejęcie: ${teams[stealing].name}`, stealing);
+      } else {
+        setStatus('Runda zakończona');
+      }
+    } else if (state.phase === 'final') {
+      setQuestion('', false);
+      finalEl.replaceChildren(...state.final.questions.map((q) => {
+        const li = document.createElement('li');
+        li.textContent = q.question;
+        return li;
+      }));
+      setStatus('FINAŁ');
+    } else {
+      setQuestion(state.phase === 'gameover' ? 'Koniec gry' : 'Czekamy na rozpoczęcie…', true);
+      setStatus('');
+    }
+  });
+
+  // ekran nie może zgasnąć w trakcie gry
+  function keepAwake() { navigator.wakeLock?.request('screen').catch(() => {}); }
+  keepAwake();
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
+</script>
+</body>
+</html>
