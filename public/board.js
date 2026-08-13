@@ -171,10 +171,14 @@ function renderEmptyBoard(state) {
 // --- intro ---
 
 // Po odświeżeniu tablicy w stanie 'music' wideo ładuje się od zera — dosuwamy
-// je na koniec, żeby pokazać ostatnią klatkę czołówki (po naturalnym 'ended'
-// wideo i tak stoi na ostatniej klatce, seek jest wtedy no-opem).
+// je na koniec, żeby pokazać ostatnią klatkę czołówki. Po naturalnym 'ended'
+// wideo już stoi na ostatniej klatce — seek do duration-0.05 cofnąłby je
+// o klatkę (widoczny przeskok), więc wtedy nie ruszamy currentTime.
 function freezeOnLastFrame(video) {
-  const seek = () => { if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05); };
+  const seek = () => {
+    if (video.ended || !video.duration) return;
+    video.currentTime = Math.max(0, video.duration - 0.05);
+  };
   video.pause();
   if (video.readyState >= 1) seek();
   else video.addEventListener('loadedmetadata', seek, { once: true });
