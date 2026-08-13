@@ -3,7 +3,8 @@ export function connectGame(onSnapshot) {
   let ws = null;
 
   function open() {
-    ws = new WebSocket(`ws://${location.host}`);
+    // strona po HTTPS nie może otworzyć ws:// (mixed content) — musi być wss://
+    ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`);
     ws.onopen = () => document.body.classList.remove('disconnected');
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
