@@ -1,0 +1,14 @@
+{
+  "name": "familiada2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test test/"
+  },
+  "dependencies": {
+    "express": "^4.19.0",
+    "qrcode": "^1.5.0",
+    "ws": "^8.18.0"
+  }
+}
