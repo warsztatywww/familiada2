@@ -108,21 +108,17 @@ main {
   display: grid; grid-template-columns: 3fr 2fr; gap: 14px; padding: 14px;
   grid-template-areas:
     'question teams'
-    'question fix'
     'final    final';
   align-items: start; align-content: start;
 }
 #question-card { grid-area: question; }
 #teams-card { grid-area: teams; }
-#fix-card { grid-area: fix; }
 #final-card { grid-area: final; }
 
 /* w finale pytania rundy nie ma — finał przejmuje lewą kolumnę, a konsole
    drużyn chudną do nazwy i banku (akcje rundy i tak są nieaktywne) */
 body.final main {
-  grid-template-areas:
-    'final teams'
-    'final fix';
+  grid-template-areas: 'final teams';
 }
 body.final .team-box button,
 body.final #teams-card > .row { display: none; }
@@ -211,10 +207,17 @@ body.final #teams-card > .row { display: none; }
   color: var(--text); font-size: 14px;
 }
 
-/* --- korekty --- */
-#fix-card summary { cursor: pointer; color: var(--muted); font-weight: 600; }
-#fix-card details { display: grid; gap: 10px; }
-#fix-card details[open] summary { margin-bottom: 10px; }
+/* --- korekty: dymek pod ⚙ w pasku górnym --- */
+header { position: relative; }
+#fix-card {
+  position: absolute; top: calc(100% + 8px); right: 12px; z-index: 10;
+  width: min(400px, calc(100vw - 24px));
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px; display: grid; gap: 12px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.6);
+}
+#btn-fix { font-size: 19px; min-width: 52px; }
+#btn-fix[aria-expanded='true'] { border-color: var(--amber); color: var(--amber); }
 #fix-card label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
 input {
   min-height: 44px; background: var(--inset); border: 1px solid var(--line);
@@ -234,7 +237,7 @@ input:focus-visible { outline: 2px solid var(--amber); outline-offset: 1px; }
      bez jawnego nadpisania wygrałby i dorobił niejawną drugą kolumnę */
   main, body.final main {
     grid-template-columns: 1fr;
-    grid-template-areas: 'question' 'teams' 'fix' 'final';
+    grid-template-areas: 'question' 'teams' 'final';
   }
   #led-status { font-size: 17px; }
 }

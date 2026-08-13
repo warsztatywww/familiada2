@@ -152,6 +152,11 @@ $('#btn-final').onclick = () => send({ type: 'startFinal' });
 
 // --- skróty klawiszowe: 1-6 odkryj, Q/W = X lewa/prawa, ←/→ rundy ---
 document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !$('#fix-card').hidden) {
+    $('#fix-card').hidden = true;
+    $('#btn-fix').setAttribute('aria-expanded', 'false');
+    return;
+  }
   if (e.target.tagName === 'INPUT') return;
   if (e.key >= '1' && e.key <= '6') {
     send({ type: 'reveal', index: Number(e.key) - 1 });
@@ -179,6 +184,16 @@ $('#btn-timer-20').onclick = () => send({ type: 'timerStart', seconds: 20, playe
 $('#btn-timer-stop').onclick = () => send({ type: 'timerStop' });
 $('#btn-repeat').onclick = () => send({ type: 'repeatBuzzer' });
 $('#btn-final-cover').onclick = () => send({ type: 'finalCover', covered: !current.state.final.covered });
+$('#btn-fix').onclick = () => {
+  const card = $('#fix-card');
+  card.hidden = !card.hidden;
+  $('#btn-fix').setAttribute('aria-expanded', String(!card.hidden));
+};
+document.addEventListener('click', (e) => {
+  if ($('#fix-card').hidden || e.target.closest('#fix-card, #btn-fix')) return;
+  $('#fix-card').hidden = true;
+  $('#btn-fix').setAttribute('aria-expanded', 'false');
+});
 for (const row of document.querySelectorAll('#fix-card .row')) {
   const t = Number(row.dataset.team);
   row.querySelector('.btn-apply').onclick = () => {

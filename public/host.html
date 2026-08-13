@@ -20,6 +20,20 @@
   <div class="cluster">
     <button id="btn-intro">▶ Intro</button>
     <button id="btn-stop-music">■ Stop muzykę</button>
+    <button id="btn-fix" aria-expanded="false">⚙</button>
+  </div>
+  <div id="fix-card" hidden>
+    <span class="eyebrow">Korekty (banki, nazwy drużyn)</span>
+    <div class="row" data-team="0">
+      <label>Nazwa <input class="name-input" maxlength="20"></label>
+      <label>Bank <input class="bank-input" type="number" min="0"></label>
+      <button class="btn-apply">Zapisz</button>
+    </div>
+    <div class="row" data-team="1">
+      <label>Nazwa <input class="name-input" maxlength="20"></label>
+      <label>Bank <input class="bank-input" type="number" min="0"></label>
+      <button class="btn-apply">Zapisz</button>
+    </div>
   </div>
 </header>
 
@@ -78,21 +92,6 @@
     <div id="final-questions"></div>
   </section>
 
-  <section class="card" id="fix-card">
-    <details>
-      <summary>Korekty (banki, nazwy drużyn)</summary>
-      <div class="row" data-team="0">
-        <label>Nazwa <input class="name-input" maxlength="20"></label>
-        <label>Bank <input class="bank-input" type="number" min="0"></label>
-        <button class="btn-apply">Zapisz</button>
-      </div>
-      <div class="row" data-team="1">
-        <label>Nazwa <input class="name-input" maxlength="20"></label>
-        <label>Bank <input class="bank-input" type="number" min="0"></label>
-        <button class="btn-apply">Zapisz</button>
-      </div>
-    </details>
-  </section>
 </main>
 
 <footer id="bottombar">
