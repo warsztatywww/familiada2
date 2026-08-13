@@ -73,7 +73,7 @@ body.disconnected::after {
    Wymiary pochodzą z --cw (szerokość modułu znakowego); nadpisanie --cw na
    .device--final przeskalowuje całość, bo pochodne liczone są na .device. */
 .device {
-  --cw: min(2.05vw, 4vh);
+  --cw: min(1.95vw, 3.9vh);
   --ch: calc(var(--cw) * 1.38);
   --gap: calc(var(--cw) * 0.11);
   display: grid;
@@ -138,29 +138,31 @@ body.disconnected::after {
   box-shadow: 0 0 0.7vh var(--lit-glow);
 }
 
-/* --- kolumny błędów przy krawędziach matrycy: do trzech małych X-ów na
-   drużynę (lewa = 0, prawa = 1), a przy nieudanym przejęciu jeden duży X --- */
+/* --- kolumny błędów przy krawędziach matrycy (lewa = 0, prawa = 1): tło ze
+   zwykłych modułów, na nim do trzech dużych X-ów, każdy ~3 moduły wysokości —
+   trzy razem wypełniają całą wysokość tablicy. Po nieudanym przejęciu jeden
+   jeszcze większy X na środku kolumny. --- */
 .edge {
+  position: relative;
   display: grid;
-  grid-template-columns: calc(var(--cw) * 2);
-  grid-template-rows: repeat(8, var(--ch));
+  grid-template-columns: repeat(3, var(--cw));
+  grid-auto-rows: var(--ch);
   gap: var(--gap);
 }
-.ecell {
-  background:
-    radial-gradient(circle, var(--unlit) 26%, transparent 34%) 0 0 / calc(100% / 10) calc(100% / 7),
-    var(--module-bg);
-  border-radius: 6%;
+.exlay {
+  position: absolute; inset: 0;
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  place-items: center;
 }
-.edge .ex {
-  grid-column: 1;
-  place-self: center;
-  font-size: calc(var(--ch) * 0.82);
+.exlay--big { grid-template-rows: 1fr; }
+.ex {
+  font-size: calc(var(--ch) * 2.4);
   line-height: 1;
-  text-shadow: 0 0 0.7vh var(--lit-glow);
-  z-index: 1;
+  color: var(--lit);
+  text-shadow: 0 0 1vh var(--lit-glow);
 }
-.edge .ex-big { font-size: calc(var(--ch) * 1.9); }
+.ex-big { font-size: calc(var(--ch) * 3.2); }
 
 /* --- boki: banki, nazwy drużyn, X-y, buzzer (czerwona = lewa, niebieska = prawa) --- */
 .side { display: grid; justify-items: center; gap: 1.8vh; align-content: center; }

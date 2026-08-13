@@ -120,16 +120,17 @@ const alignRight = (s, cols) => s.padStart(cols);
 const center = (s, cols) => s.padStart(Math.floor((cols + chars(s).length) / 2));
 const sumLine = (sum, cols) => alignRight(`SUMA ${String(sum).padStart(3)}`, cols);
 
-// Kolumny błędów przy krawędziach matrycy: do trzech małych X-ów (wiersze
-// 3–5), a po nieudanym przejęciu jeden duży X zamiast nich.
+// Kolumny błędów przy krawędziach matrycy: do trzech dużych X-ów (trzy
+// wypełniają całą wysokość tablicy, pojawiają się od góry), a po nieudanym
+// przejęciu jeden jeszcze większy X zamiast nich.
 function renderEdges(strikes, stealFailed) {
+  const modules = Array.from({ length: ROWS * 3 }, () => '<span class="cell"></span>').join('');
   for (const t of [0, 1]) {
-    const modules = Array.from({ length: ROWS }, (_, r) =>
-      `<span class="ecell" style="grid-row:${r + 1}"></span>`).join('');
     const xs = stealFailed === t
-      ? `<span class="ex ex-big" style="grid-row:4/span 2">X</span>`
-      : Array.from({ length: strikes[t] }, (_, i) =>
-          `<span class="ex" style="grid-row:${i + 3}">X</span>`).join('');
+      ? '<div class="exlay exlay--big"><span class="ex ex-big">X</span></div>'
+      : `<div class="exlay">${[0, 1, 2]
+          .map((i) => `<span class="ex">${i < strikes[t] ? 'X' : ''}</span>`)
+          .join('')}</div>`;
     $(`edge-${t}`).innerHTML = modules + xs;
   }
 }
