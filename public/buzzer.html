@@ -58,7 +58,9 @@
   });
 
   // ekran nie może zgasnąć w trakcie gry
-  try { navigator.wakeLock?.request('screen'); } catch {}
+  function keepAwake() { navigator.wakeLock?.request('screen').catch(() => {}); }
+  keepAwake();
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
 </script>
 </body>
 </html>
