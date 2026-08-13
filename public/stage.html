@@ -10,7 +10,7 @@
   body {
     background: #111318; color: #e8eaf0;
     font-family: system-ui, sans-serif;
-    display: grid; grid-template-rows: 1fr auto;
+    display: grid; grid-template-rows: 1fr auto auto;
     user-select: none; -webkit-user-select: none;
   }
   body.disconnected::before {
@@ -28,6 +28,12 @@
   }
   #status.team-0 { background: #3d8bfd; color: #fff; }
   #status.team-1 { background: #ff4d4d; color: #fff; }
+  #huddle {
+    padding: 3vw; font-size: 4.5vw; font-weight: 800; text-align: center;
+    background: #ffb300; color: #111318;
+    animation: huddle-pulse 1s ease-in-out infinite;
+  }
+  @keyframes huddle-pulse { 50% { background: #ffd25e; } }
 </style>
 </head>
 <body>
@@ -35,12 +41,14 @@
   <div id="question" class="muted">Czekamy na rozpoczęcie…</div>
   <ol id="final" hidden></ol>
 </main>
+<div id="huddle" hidden></div>
 <div id="status"></div>
 <script type="module">
   import { connectGame } from '/common/ws.js';
   const questionEl = document.getElementById('question');
   const finalEl = document.getElementById('final');
   const statusEl = document.getElementById('status');
+  const huddleEl = document.getElementById('huddle');
 
   function setQuestion(text, muted) {
     questionEl.textContent = text;
@@ -56,6 +64,11 @@
   connectGame(({ state }) => {
     const { round, teams } = state;
     finalEl.hidden = state.phase !== 'final';
+    // Po 2. dużym X drużyna przeciwna zaczyna naradę przed ewentualnym przejęciem
+    const huddle = state.phase === 'round' && round.stage === 'play'
+      && round.strikes[round.playingTeam] === 2;
+    huddleEl.hidden = !huddle;
+    if (huddle) huddleEl.textContent = `💬 ${teams[1 - round.playingTeam].name} zaczyna naradę!`;
     if (state.phase === 'round') {
       setQuestion(round.question, false);
       if (round.stage === 'buzzers') {
