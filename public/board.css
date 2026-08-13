@@ -29,18 +29,24 @@ body.disconnected::after {
   content: '⟳';
   position: fixed; top: 12px; right: 16px; font-size: 3vh; opacity: 0.5;
 }
-#audio-hint {
-  position: fixed; bottom: 1.5vh; left: 50%; transform: translateX(-50%);
-  font-size: 2vh; letter-spacing: 0.05em; opacity: 0.45;
-  text-transform: none; z-index: 10;
+/* --- bramka startowa (nakładka na cały ekran, wymaga kliknięcia) --- */
+#start-gate {
+  position: fixed; inset: 0; z-index: 100;
+  display: grid; place-content: center; justify-items: center; gap: 4vh;
+  background: var(--bg); cursor: pointer;
 }
-#btn-fullscreen {
-  position: fixed; bottom: 1.5vh; right: 1.5vw; z-index: 10;
-  background: none; border: 1px solid rgba(255, 217, 74, 0.25); border-radius: 6px;
-  color: var(--lit); font-size: 3vh; line-height: 1; padding: 0.6vh 1vh;
-  opacity: 0.35; cursor: pointer;
+#btn-start {
+  font-family: 'Familiada', monospace; text-transform: uppercase;
+  background: none; border: 0.4vh solid var(--lit); border-radius: 1.5vh;
+  color: var(--lit); font-size: 7vh; line-height: 1; padding: 3vh 6vh;
+  text-shadow: 0 0 16px var(--lit-glow); box-shadow: 0 0 24px var(--lit-glow);
+  cursor: pointer;
 }
-#btn-fullscreen:hover { opacity: 1; }
+#btn-start:hover { filter: brightness(1.3); }
+#start-gate p {
+  font-family: 'Familiada', monospace; text-transform: uppercase;
+  font-size: 2.4vh; letter-spacing: 0.05em; opacity: 0.55;
+}
 
 #board, #board > section { height: 100vh; }
 

@@ -11,9 +11,7 @@ function show(viewId) {
 // --- dźwięki i wielki X ---
 
 const audioCtx = new AudioContext();
-function showAudioHint() { $('audio-hint').hidden = false; }
 function beep(freq, ms, gainVal = 0.3) {
-  if (audioCtx.state !== 'running') showAudioHint();
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.frequency.value = freq;
@@ -27,7 +25,7 @@ function beep(freq, ms, gainVal = 0.3) {
 function play(id) {
   const el = $(id);
   el.currentTime = 0;
-  el.play().catch(showAudioHint); // autoplay-block przed pierwszym gestem — pokaż podpowiedź
+  el.play().catch(() => {}); // audio odblokowane bramką startową; catch na wszelki wypadek
 }
 
 let xTimeout = null;
@@ -75,7 +73,7 @@ function handleEvent(event) {
       video.currentTime = 0;
       video.play().catch(() => {});
       music.currentTime = 0;
-      music.play().catch(showAudioHint);
+      music.play().catch(() => {});
       break;
     }
   }
@@ -143,7 +141,7 @@ function renderIntro(state) {
     video.currentTime = 0;
     video.play();
     music.currentTime = 0;
-    music.play().catch(showAudioHint);
+    music.play().catch(() => {});
   } else if (state.intro === 'idle') {
     show('view-intro'); // pierwsza klatka: video spauzowane na 0
     video.pause();
@@ -156,7 +154,7 @@ function renderIntro(state) {
     // trzeba dograć muzykę (bez resetu currentTime; po reloadzie i tak od 0).
     show('view-intro');
     freezeOnLastFrame(video);
-    if (music.paused) music.play().catch(showAudioHint);
+    if (music.paused) music.play().catch(() => {});
   }
 }
 
@@ -278,30 +276,20 @@ $('intro-video').addEventListener('ended', () => game.send({ type: 'introVideoEn
 
 // --- odblokowanie audio po pierwszym geście użytkownika ---
 
-const audioHint = $('audio-hint');
-setTimeout(() => { audioHint.hidden = true; }, 5000);
-// Podpowiedź wraca (showAudioHint) przy każdej zablokowanej próbie odtwarzania
-// i znika dopiero po kliknięciu, które odblokowuje audio.
-document.addEventListener('click', () => {
+// --- bramka startowa: pełny ekran + odblokowanie audio ---
+// Tablica startuje z pełnoekranową nakładką i wymaga jednego kliknięcia.
+// Ten gest jednocześnie wchodzi w tryb pełnoekranowy i odblokowuje audio
+// (przeglądarki blokują dźwięk do pierwszej interakcji użytkownika).
+
+$('btn-start').addEventListener('click', () => {
   audioCtx.resume();
-  audioHint.hidden = true;
-  // Ciągłe audio intro zablokowane przez autoplay doganiamy po geście:
-  // w trakcie wideo synchronizujemy muzykę do jego pozycji.
+  document.documentElement.requestFullscreen().catch(() => {});
+  $('start-gate').hidden = true;
+  // Jeśli intro leci w tle, dograj/zsynchronizuj muzykę po odblokowaniu.
   const music = $('snd-intro');
   const video = $('intro-video');
   if (lastState?.phase === 'idle' && music.paused) {
-    if (lastState.intro === 'video') {
-      music.currentTime = video.currentTime;
-      music.play().catch(() => {});
-    } else if (lastState.intro === 'music') {
-      music.play().catch(() => {});
-    }
+    if (lastState.intro === 'video') music.currentTime = video.currentTime;
+    if (lastState.intro === 'video' || lastState.intro === 'music') music.play().catch(() => {});
   }
-});
-
-// --- pełny ekran ---
-
-$('btn-fullscreen').addEventListener('click', () => {
-  if (document.fullscreenElement) document.exitFullscreen();
-  else document.documentElement.requestFullscreen().catch(() => {});
 });
