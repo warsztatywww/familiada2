@@ -186,16 +186,28 @@ test('przejęcie udane: suma dla drużyny przeciwnej', () => {
   assert.equal(ev.type, 'steal-success');
   assert.equal(state.round.stage, 'done');
   assert.equal(state.round.sumWinner, 1);
+  assert.equal(state.round.stealFailed, null); // bez dużego X na tablicy
   assert.equal(state.teams[1].bank, 80); // 50 + 30
   assert.equal(state.teams[0].bank, 0);
 });
 
-test('przejęcie nieudane: suma zostaje u grających', () => {
+test('przejęcie nieudane: suma zostaje u grających, X przejmujących w stanie', () => {
   const state = playedToSteal();
   const ev = apply(state, { type: 'stealFail' });
   assert.equal(ev.type, 'steal-fail');
+  assert.equal(ev.team, 1);
   assert.equal(state.round.sumWinner, 0);
+  // stealFailed trwa w stanie (nie tylko w evencie) — duży X na tablicy ma
+  // przetrwać odświeżenie strony do końca rundy.
+  assert.equal(state.round.stealFailed, 1);
   assert.equal(state.teams[0].bank, 50);
+});
+
+test('stealFailed: nowa runda zaczyna bez dużego X', () => {
+  const state = playedToSteal();
+  apply(state, { type: 'stealFail' });
+  apply(state, { type: 'newRound', roundIndex: 1 });
+  assert.equal(state.round.stealFailed, null);
 });
 
 test('tanie odkrycie po rundzie: bez punktów', () => {
