@@ -8,6 +8,7 @@ import path from 'node:path';
 import QRCode from 'qrcode';
 import { loadQuestions } from './questions.js';
 import { createGame, apply } from './game.js';
+import { createHistory, describeCommand } from './history.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
@@ -31,6 +32,7 @@ export async function startServer({ port, stateFile, questionsFile }) {
   }
 
   let seq = 0;
+  const history = createHistory(100);
   const app = express();
   app.use(express.static(PUBLIC_DIR, { extensions: ['html'] }));
   app.get('/buzzer/:team(1|2)', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'buzzer.html')));
@@ -52,7 +54,23 @@ export async function startServer({ port, stateFile, questionsFile }) {
   wss.on('error', () => {});
 
   function snapshot(event) {
-    return JSON.stringify({ type: 'state', seq, now: Date.now(), event, state });
+    return JSON.stringify({
+      type: 'state', seq, now: Date.now(), event, state,
+      undoLabel: history.undoLabel(), redoLabel: history.redoLabel(),
+    });
+  }
+
+  function broadcast(event) {
+    seq += 1;
+    try {
+      writeFileSync(stateFile, JSON.stringify(state));
+    } catch (e) {
+      console.error('zapis state.json nieudany:', e.message);
+    }
+    const data = snapshot(event);
+    for (const client of wss.clients) {
+      if (client.readyState === 1 /* OPEN */) client.send(data);
+    }
   }
 
   wss.on('connection', (ws) => {
@@ -67,7 +85,16 @@ export async function startServer({ port, stateFile, questionsFile }) {
       }
       if (msg?.type !== 'command' || typeof msg.cmd?.type !== 'string') return;
       const cmd = msg.cmd;
+      if (cmd.type === 'undo' || cmd.type === 'redo') {
+        const restored = cmd.type === 'undo' ? history.undo(state) : history.redo(state);
+        if (!restored) return;
+        state = restored;
+        state.config = config; // pytania zawsze świeże, jak przy wczytaniu z pliku
+        broadcast(null);
+        return;
+      }
       if (cmd.type === 'timerStart') cmd.now = Date.now();
+      const before = structuredClone(state);
       let event;
       try {
         event = apply(state, cmd);
@@ -77,16 +104,9 @@ export async function startServer({ port, stateFile, questionsFile }) {
       }
       const stateChanged = event !== null || wasSilentChange(cmd);
       if (!stateChanged) return;
-      seq += 1;
-      try {
-        writeFileSync(stateFile, JSON.stringify(state));
-      } catch (e) {
-        console.error('zapis state.json nieudany:', e.message);
-      }
-      const data = snapshot(event);
-      for (const client of wss.clients) {
-        if (client.readyState === 1 /* OPEN */) client.send(data);
-      }
+      // introVideoEnded to automat z tablicy — nie zaśmieca wierzchu stosu undo
+      if (cmd.type !== 'introVideoEnded') history.push(describeCommand(cmd, before), before);
+      broadcast(event);
     });
   });
 

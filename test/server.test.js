@@ -69,6 +69,61 @@ test('serwer: uszkodzona ramka WS nie ubija procesu', async () => {
   rmSync(stateFile, { force: true });
 });
 
+test('serwer: undo/redo przywraca stan i rozsyła etykiety', async () => {
+  const stateFile = 'test-state-undo.json';
+  rmSync(stateFile, { force: true });
+  const srv = await startServer({ port: 0, stateFile, questionsFile: 'questions.json' });
+  const ws = new WebSocket(`ws://127.0.0.1:${srv.port}`);
+  const send = (cmd) => ws.send(JSON.stringify({ type: 'command', cmd }));
+  const first = await nextMessage(ws);
+  assert.equal(first.undoLabel, null);
+  assert.equal(first.redoLabel, null);
+
+  // introVideoEnded zmienia stan, ale nie tworzy wpisu historii
+  send({ type: 'introStart' });
+  const afterIntro = await nextMessage(ws);
+  assert.equal(afterIntro.undoLabel, 'intro');
+  send({ type: 'introVideoEnded' });
+  const afterVideo = await nextMessage(ws);
+  assert.equal(afterVideo.state.intro, 'music');
+  assert.equal(afterVideo.undoLabel, 'intro'); // wierzch stosu bez zmian
+
+  send({ type: 'newRound', roundIndex: 0 });
+  const afterRound = await nextMessage(ws);
+  assert.equal(afterRound.state.phase, 'round');
+  assert.equal(afterRound.undoLabel, 'nowa runda 1');
+
+  send({ type: 'undo' });
+  const afterUndo = await nextMessage(ws);
+  assert.equal(afterUndo.state.phase, 'idle');
+  assert.equal(afterUndo.event, null); // bez dźwięków na tablicy
+  assert.equal(afterUndo.undoLabel, 'intro');
+  assert.equal(afterUndo.redoLabel, 'nowa runda 1');
+
+  send({ type: 'redo' });
+  const afterRedo = await nextMessage(ws);
+  assert.equal(afterRedo.state.phase, 'round');
+  assert.equal(afterRedo.undoLabel, 'nowa runda 1');
+  assert.equal(afterRedo.redoLabel, null);
+
+  // dwa undo opróżniają stos; trzecie jest ignorowane (bez broadcastu),
+  // a kolejna komenda czyści stos redo
+  send({ type: 'undo' });
+  await nextMessage(ws); // powrót do idle (intro 'music')
+  send({ type: 'undo' });
+  await nextMessage(ws); // powrót sprzed intro
+  send({ type: 'undo' }); // pusty stos — cisza
+  send({ type: 'newRound', roundIndex: 0 });
+  const afterR2 = await nextMessage(ws); // pierwszy broadcast po pustym undo
+  assert.equal(afterR2.state.phase, 'round');
+  assert.equal(afterR2.undoLabel, 'nowa runda 1');
+  assert.equal(afterR2.redoLabel, null); // nowa akcja wyczyściła redo
+
+  ws.close();
+  await srv.close();
+  rmSync(stateFile, { force: true });
+});
+
 test('serwer: /qr.svg z niepoprawnymi (za długimi) danymi zwraca 400 i nie ubija serwera', async () => {
   const stateFile = 'test-state-qr.json';
   rmSync(stateFile, { force: true });
