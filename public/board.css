@@ -67,7 +67,7 @@ body.disconnected::after {
     var(--bg);
 }
 #view-round { grid-template-columns: 1fr auto 1fr; gap: 1vw; padding: 0 1.5vw; }
-#view-final, #view-gameover { justify-items: center; }
+#view-final { justify-items: center; }
 
 /* --- urządzenie: mały wyświetlacz sumy + rama + matryca znakowa ---
    Wymiary pochodzą z --cw (szerokość modułu znakowego); nadpisanie --cw na
@@ -128,7 +128,6 @@ body.disconnected::after {
   color: var(--lit);
   text-shadow: 0 0 0.7vh var(--lit-glow);
 }
-.cell.win { animation: won-flash 0.7s step-end infinite; }
 /* Zakryte punkty w finale: pełny świecący blok 5×7 (kurtyna). */
 .cell.block {
   background:

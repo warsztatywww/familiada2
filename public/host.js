@@ -24,7 +24,6 @@ function render(msg) {
   $('#stage-badge').textContent =
     state.phase === 'idle' ? 'START' :
     state.phase === 'final' ? 'FINAŁ' :
-    state.phase === 'gameover' ? 'KONIEC GRY' :
     STAGE_LABELS[r.stage] + (r.playingTeam !== null ? ` — ${state.teams[r.playingTeam].name}` : '');
 
   $('#round-info').textContent = inRound
@@ -148,7 +147,6 @@ $('#btn-reset-round').onclick = () => send({ type: 'newRound', roundIndex: curre
 $('#btn-prev-round').onclick = () => send({ type: 'newRound', roundIndex: current.state.roundIndex - 1 });
 $('#btn-next-round').onclick = () =>
   send({ type: 'newRound', roundIndex: current.state.phase === 'round' ? current.state.roundIndex + 1 : 0 });
-$('#btn-end-game').onclick = () => send({ type: 'endGame' });
 $('#btn-new-game').onclick = () => {
   if (confirm('Na pewno zacząć NOWĄ GRĘ? Banki i postęp zostaną wyzerowane.')) send({ type: 'newGame' });
 };

@@ -130,12 +130,6 @@ test('awardSum: odrzucany w stage buzzers', () => {
   assert.equal(state.teams[1].bank, 0);
 });
 
-test('introStart: odrzucany poza fazą idle', () => {
-  const state = freshRound(0);
-  assert.equal(apply(state, { type: 'introStart' }), null);
-  assert.equal(state.intro, 'off');
-});
-
 test('repeatBuzzer: odrzucany poza finałem', () => {
   const state = freshRound(0);
   assert.equal(apply(state, { type: 'repeatBuzzer' }), null);
@@ -428,17 +422,25 @@ test('newRound zatrzymuje muzykę intro', () => {
   assert.equal(state.intro, 'off');
 });
 
-test('endGame i newGame', () => {
+test('newGame zeruje banki i wraca do idle', () => {
   const state = freshRound(0);
   apply(state, { type: 'setBank', team: 0, value: 300 });
-  const ev = apply(state, { type: 'endGame' });
-  assert.equal(ev.type, 'game-over');
-  assert.equal(state.phase, 'gameover');
-  const ev2 = apply(state, { type: 'newGame' });
-  assert.equal(ev2.type, 'new-game');
+  const ev = apply(state, { type: 'newGame' });
+  assert.equal(ev.type, 'new-game');
   assert.equal(state.phase, 'idle');
   assert.equal(state.teams[0].bank, 0);
   assert.equal(state.round, null);
+});
+
+test('introStart w trakcie gry: wraca do intro, banki zostają', () => {
+  const state = freshRound(0);
+  apply(state, { type: 'setBank', team: 0, value: 300 });
+  const ev = apply(state, { type: 'introStart' });
+  assert.deepEqual(ev, { type: 'intro' });
+  assert.equal(state.phase, 'idle');
+  assert.equal(state.intro, 'video');
+  assert.equal(state.round, null);
+  assert.equal(state.teams[0].bank, 300);
 });
 
 test('timerStart: odrzuca seconds === 0', () => {

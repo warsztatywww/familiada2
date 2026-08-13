@@ -50,7 +50,6 @@ export function describeCommand(cmd, state) {
     case 'repeatBuzzer': return 'powtórzona';
     case 'introStart': return 'intro';
     case 'stopMusic': return 'stop muzyki';
-    case 'endGame': return 'koniec gry';
     case 'newGame': return 'nowa gra';
     default: return cmd.type;
   }

@@ -275,29 +275,13 @@ function startTimerLoop(timer, serverNow) {
 }
 function stopTimerLoop() { cancelAnimationFrame(timerRAF); }
 
-// --- koniec gry ---
-
-function renderGameover(state) {
-  const winner = state.teams[0].bank === state.teams[1].bank ? null
-    : state.teams[0].bank > state.teams[1].bank ? 0 : 1;
-  const teamLine = (t) => ({
-    text: `${fit(state.teams[t].name, COLS - 5)} ${String(state.teams[t].bank).padStart(4)}`,
-    cls: winner === t ? 'win' : '',
-  });
-  const lines = ['', center('KONIEC GRY', COLS), '', teamLine(0), teamLine(1)];
-  if (state.final) lines.push('', center(`FINAŁ ${state.final.sum}`, COLS));
-  setCells($('go-grid'), lines, COLS);
-  setMini($('mini-go'), state.teams[winner ?? 0].bank);
-}
-
 let lastState = null; // najnowszy state — potrzebny w handlerze kliknięcia (odblokowanie audio)
 function render(msg) {
   const { state } = msg;
   lastState = state;
   if (state.phase !== 'final') {
     // Pętla RAF timera finału nie może przeżyć wyjścia z widoku finału —
-    // inaczej tyka i piszczy w tle nad ukrytym #final-timer (np. po endGame
-    // w trakcie odliczania).
+    // inaczej tyka i piszczy w tle nad ukrytym #final-timer.
     stopTimerLoop();
     lastTimerStart = null;
   }
@@ -316,9 +300,6 @@ function render(msg) {
   } else if (state.phase === 'final') {
     show('view-final');
     renderFinal(msg);
-  } else if (state.phase === 'gameover') {
-    show('view-gameover');
-    renderGameover(state);
   }
   if (state.phase !== 'idle') {
     $('snd-intro').pause();

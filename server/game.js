@@ -182,7 +182,9 @@ export function apply(state, cmd) {
       if (state.phase !== 'final') return null;
       return { type: 'repeat' };
     case 'introStart': {
-      if (state.phase !== 'idle') return null;
+      // W trakcie gry: powrót na ekran intro (banki zostają, rundę odda COFNIJ)
+      state.phase = 'idle';
+      state.round = null;
       state.intro = 'video';
       return { type: 'intro' };
     }
@@ -194,11 +196,6 @@ export function apply(state, cmd) {
     case 'stopMusic': {
       state.intro = 'off';
       return null;
-    }
-    case 'endGame': {
-      state.phase = 'gameover';
-      state.round = null;
-      return { type: 'game-over' };
     }
     case 'newGame': {
       Object.assign(state, createGame(state.config));
