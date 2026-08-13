@@ -201,3 +201,57 @@ test('setBank i setTeamName', () => {
   assert.equal(state.teams[0].bank, 123);
   assert.equal(state.teams[1].name, 'Nerdzi');
 });
+
+test('setBank: odrzuca wartość ujemną', () => {
+  const state = createGame(structuredClone(CONFIG));
+  const result = apply(state, { type: 'setBank', team: 0, value: -10 });
+  assert.equal(result, null);
+  assert.equal(state.teams[0].bank, 0);
+});
+
+test('setBank: odrzuca non-integer', () => {
+  const state = createGame(structuredClone(CONFIG));
+  const result = apply(state, { type: 'setBank', team: 0, value: 3.14 });
+  assert.equal(result, null);
+  assert.equal(state.teams[0].bank, 0);
+});
+
+test('setTeamName: odrzuca pusty string', () => {
+  const state = createGame(structuredClone(CONFIG));
+  const initialName = state.teams[0].name;
+  const result = apply(state, { type: 'setTeamName', team: 0, name: '' });
+  assert.equal(result, null);
+  assert.equal(state.teams[0].name, initialName);
+});
+
+test('setTeamName: odrzuca non-string', () => {
+  const state = createGame(structuredClone(CONFIG));
+  const initialName = state.teams[0].name;
+  const result = apply(state, { type: 'setTeamName', team: 0, name: 123 });
+  assert.equal(result, null);
+  assert.equal(state.teams[0].name, initialName);
+});
+
+test('unstrike: zwraca null gdy strikes === 0', () => {
+  const state = freshRound(0);
+  apply(state, { type: 'choosePlayingTeam', team: 0 });
+  const result = apply(state, { type: 'unstrike', team: 0 });
+  assert.equal(result, null);
+  assert.equal(state.round.strikes[0], 0);
+});
+
+test('awardSum: zwraca null gdy stage === done', () => {
+  const state = playedToSteal();
+  apply(state, { type: 'stealFail' });
+  const result = apply(state, { type: 'awardSum', team: 0 });
+  assert.equal(result, null);
+  assert.equal(state.teams[0].bank, 50); // bez zmian
+});
+
+test('stealFail: zwraca null gdy stage !== steal', () => {
+  const state = freshRound(0);
+  apply(state, { type: 'choosePlayingTeam', team: 0 });
+  const result = apply(state, { type: 'stealFail' });
+  assert.equal(result, null);
+  assert.equal(state.round.stage, 'play'); // bez zmian
+});
