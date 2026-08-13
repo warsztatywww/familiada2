@@ -352,12 +352,23 @@ test('finał: suma >= 200 daje final-win', () => {
   assert.equal(state.final.won, true);
 });
 
+test('startFinal: odrzucany w trakcie finału (nie kasuje jego stanu)', () => {
+  const state = freshFinal();
+  apply(state, { type: 'finalSet', qIndex: 0, player: 0, answerIndex: 0 });
+  const sum = state.final.sum;
+  assert.equal(apply(state, { type: 'startFinal' }), null);
+  assert.equal(state.final.sum, sum);
+  assert.notEqual(state.final.entries[0][0], null);
+});
+
 test('finalCover: przełącza zakrycie tylko w finale', () => {
   const state = freshFinal();
   assert.equal(state.final.covered, false);
-  assert.equal(apply(state, { type: 'finalCover', covered: true }), null); // komenda cicha
+  // zakrycie = wejście gracza 2 — zdarzenie gra jingiel na tablicy
+  assert.deepEqual(apply(state, { type: 'finalCover', covered: true }), { type: 'final-cover' });
   assert.equal(state.final.covered, true);
-  apply(state, { type: 'finalCover', covered: false });
+  // odkrycie jest ciche
+  assert.equal(apply(state, { type: 'finalCover', covered: false }), null);
   assert.equal(state.final.covered, false);
 });
 
@@ -451,24 +462,9 @@ test('timerStart: odrzuca seconds nie-integer', () => {
   assert.equal(state.final.timer, null);
 });
 
-test('timerStart echuje player 1 i 2', () => {
+test('timerStart: samo zdarzenie, bez echa dodatkowych pól', () => {
   const s = freshFinal();
-  const ev1 = apply(s, { type: 'timerStart', seconds: 15, player: 1, now: 1000 });
-  assert.equal(ev1.player, 1);
-  const ev2 = apply(s, { type: 'timerStart', seconds: 20, player: 2, now: 2000 });
-  assert.equal(ev2.player, 2);
-});
-
-test('timerStart bez player: pole undefined, timer ustawiony', () => {
-  const s = freshFinal();
-  const ev = apply(s, { type: 'timerStart', seconds: 15, now: 1000 });
-  assert.equal(ev.player, undefined);
-  assert.deepEqual(s.final.timer, { duration: 15, startedAt: 1000 });
-});
-
-test('timerStart z nieprawidłowym player: pominięty, timer ustawiony', () => {
-  const s = freshFinal();
-  const ev = apply(s, { type: 'timerStart', seconds: 15, player: 5, now: 1000 });
-  assert.equal(ev.player, undefined);
+  const ev = apply(s, { type: 'timerStart', seconds: 15, player: 2, now: 1000 });
+  assert.deepEqual(ev, { type: 'timer-start' });
   assert.deepEqual(s.final.timer, { duration: 15, startedAt: 1000 });
 });

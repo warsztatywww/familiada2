@@ -53,8 +53,9 @@ function handleEvent(event) {
     case 'final-start':
       playJingle('jingle-prefinal');
       break;
-    case 'timer-start':
-      if (event.player === 2) playJingle('jingle-after1');
+    case 'final-cover':
+      // zakrycie tablicy = wejście gracza 2
+      playJingle('jingle-after1');
       break;
     case 'intro': {
       // Ponowne kliknięcie "Intro" w trakcie odtwarzania = replay od początku.

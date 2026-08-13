@@ -72,9 +72,13 @@ function render(msg) {
   }
   $('#btn-reset-buzzers').disabled = !inRound || r.stage !== 'buzzers';
   $('#btn-steal-fail').disabled = !inRound || r.stage !== 'steal';
-  $('#btn-final').disabled = state.config.final.length !== 5;
+  // ponowny start finału skasowałby odpowiedzi graczy; powrót z finału robi COFNIJ
+  $('#btn-final').disabled = state.phase === 'final' || state.config.final.length !== 5;
+  $('#btn-reset-round').disabled = !inRound;
   $('#btn-prev-round').disabled = !inRound || state.roundIndex === 0;
-  $('#btn-next-round').disabled = inRound && state.roundIndex >= state.config.rounds.length - 1;
+  // aktywna tylko na start gry (idle) i między rundami — nie wyprowadza z finału
+  $('#btn-next-round').disabled = !(state.phase === 'idle' ||
+    (inRound && state.roundIndex < state.config.rounds.length - 1));
 
   const f = state.final;
   $('#final-card').hidden = state.phase !== 'final';
@@ -140,7 +144,7 @@ $('#btn-intro').onclick = () => send({ type: 'introStart' });
 $('#btn-stop-music').onclick = () => send({ type: 'stopMusic' });
 $('#btn-undo').onclick = () => send({ type: 'undo' });
 $('#btn-redo').onclick = () => send({ type: 'redo' });
-$('#btn-new-round').onclick = () => send({ type: 'newRound', roundIndex: current?.state.roundIndex ?? 0 });
+$('#btn-reset-round').onclick = () => send({ type: 'newRound', roundIndex: current.state.roundIndex });
 $('#btn-prev-round').onclick = () => send({ type: 'newRound', roundIndex: current.state.roundIndex - 1 });
 $('#btn-next-round').onclick = () =>
   send({ type: 'newRound', roundIndex: current.state.phase === 'round' ? current.state.roundIndex + 1 : 0 });
@@ -179,8 +183,8 @@ $('#final-questions').addEventListener('click', (e) => {
   const answerIndex = btn.dataset.a === 'null' ? null : Number(btn.dataset.a);
   send({ type: 'finalSet', qIndex, player, answerIndex });
 });
-$('#btn-timer-15').onclick = () => send({ type: 'timerStart', seconds: 15, player: 1 });
-$('#btn-timer-20').onclick = () => send({ type: 'timerStart', seconds: 20, player: 2 });
+$('#btn-timer-15').onclick = () => send({ type: 'timerStart', seconds: 15 });
+$('#btn-timer-20').onclick = () => send({ type: 'timerStart', seconds: 20 });
 $('#btn-timer-stop').onclick = () => send({ type: 'timerStop' });
 $('#btn-repeat').onclick = () => send({ type: 'repeatBuzzer' });
 $('#btn-final-cover').onclick = () => send({ type: 'finalCover', covered: !current.state.final.covered });

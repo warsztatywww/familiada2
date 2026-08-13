@@ -41,6 +41,11 @@
     color: var(--muted);
   }
   main { display: grid; align-content: safe center; justify-content: center; padding: 6vw; gap: 6vw; overflow-y: auto; }
+  #round-meta {
+    font-size: 3.5vw; font-weight: 600; text-align: center;
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted);
+  }
+  #round-meta.boost { color: var(--amber); text-shadow: 0 0 8px var(--amber-glow); }
   #question { font-size: 8vw; font-weight: 800; line-height: 1.25; text-align: center; }
   #question.muted { color: var(--muted); font-weight: 400; }
   ol { display: grid; gap: 4vw; padding-left: 8vw; font-size: 5.5vw; font-weight: 600; line-height: 1.3; }
@@ -67,6 +72,7 @@
   <span>scena</span>
 </div>
 <main>
+  <div id="round-meta" hidden></div>
   <div id="question" class="muted">Czekamy na rozpoczęcie…</div>
   <ol id="final" hidden></ol>
 </main>
@@ -75,6 +81,7 @@
 <script type="module">
   import { connectGame } from '/common/ws.js';
   const questionEl = document.getElementById('question');
+  const roundMetaEl = document.getElementById('round-meta');
   const finalEl = document.getElementById('final');
   const statusEl = document.getElementById('status');
   const huddleEl = document.getElementById('huddle');
@@ -98,7 +105,12 @@
       && round.strikes[round.playingTeam] === 2;
     huddleEl.hidden = !huddle;
     if (huddle) huddleEl.textContent = `💬 ${teams[1 - round.playingTeam].name} zaczyna naradę!`;
+    roundMetaEl.hidden = state.phase !== 'round';
     if (state.phase === 'round') {
+      // prowadzący musi wiedzieć, kiedy zapowiedzieć "punkty razy dwa/trzy"
+      roundMetaEl.textContent =
+        `Runda ${state.roundIndex + 1}/${state.config.rounds.length} • punkty x${round.multiplier}`;
+      roundMetaEl.classList.toggle('boost', round.multiplier > 1);
       setQuestion(round.question, false);
       if (round.stage === 'buzzers') {
         if (round.buzzed === null) setStatus('🔔 Buzzery — czekamy…');

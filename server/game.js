@@ -128,7 +128,8 @@ export function apply(state, cmd) {
       return { type: 'strike', team: cmd.team };
     }
     case 'startFinal': {
-      if (state.config.final.length !== 5) return null;
+      // ponowny start w trakcie finału skasowałby odpowiedzi graczy
+      if (state.phase === 'final' || state.config.final.length !== 5) return null;
       state.phase = 'final';
       state.round = null;
       state.final = {
@@ -161,16 +162,16 @@ export function apply(state, cmd) {
       return { type: 'final-reveal', qIndex, player };
     }
     case 'finalCover': {
-      // Zakrycie odpowiedzi na tablicy na czas wejścia gracza 2. Komenda cicha.
+      // Zakrycie odpowiedzi na tablicy na czas wejścia gracza 2 — to moment
+      // jingla "po 1. rundzie finału". Odkrycie jest ciche.
       if (state.phase !== 'final' || typeof cmd.covered !== 'boolean') return null;
       state.final.covered = cmd.covered;
-      return null;
+      return cmd.covered ? { type: 'final-cover' } : null;
     }
     case 'timerStart': {
       if (state.phase !== 'final' || !Number.isInteger(cmd.seconds) || cmd.seconds <= 0) return null;
       state.final.timer = { duration: cmd.seconds, startedAt: cmd.now };
-      const player = cmd.player === 1 || cmd.player === 2 ? cmd.player : undefined;
-      return { type: 'timer-start', player };
+      return { type: 'timer-start' };
     }
     case 'timerStop': {
       if (state.phase !== 'final' || !state.final.timer) return null;
