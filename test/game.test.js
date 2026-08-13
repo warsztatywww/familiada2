@@ -362,3 +362,24 @@ test('endGame i newGame', () => {
   assert.equal(state.teams[0].bank, 0);
   assert.equal(state.round, null);
 });
+
+test('timerStart: odrzuca seconds === 0', () => {
+  const state = freshFinal();
+  const result = apply(state, { type: 'timerStart', seconds: 0, now: 1000000 });
+  assert.equal(result, null);
+  assert.equal(state.final.timer, null);
+});
+
+test('timerStart: odrzuca seconds < 0', () => {
+  const state = freshFinal();
+  const result = apply(state, { type: 'timerStart', seconds: -5, now: 1000000 });
+  assert.equal(result, null);
+  assert.equal(state.final.timer, null);
+});
+
+test('timerStart: odrzuca seconds nie-integer', () => {
+  const state = freshFinal();
+  const result = apply(state, { type: 'timerStart', seconds: 1.5, now: 1000000 });
+  assert.equal(result, null);
+  assert.equal(state.final.timer, null);
+});
