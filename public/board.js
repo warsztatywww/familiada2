@@ -186,6 +186,8 @@ function renderIntro(state) {
   introShown = state.intro;
   const video = $('intro-video');
   const music = $('snd-intro');
+  // Logo WWW rozbłyska nad ostatnią klatką po zakończeniu wideo.
+  $('view-intro').classList.toggle('logo-visible', state.intro === 'music');
   if (state.intro === 'video') {
     show('view-intro');
     video.currentTime = 0;
