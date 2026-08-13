@@ -137,7 +137,7 @@ $('#btn-new-game').onclick = () => {
 };
 $('#btn-final').onclick = () => send({ type: 'startFinal' });
 
-// --- skróty klawiszowe: 1-6 odkryj/schowaj, Q/W = X lewa/prawa, ←/→ rundy ---
+// --- skróty klawiszowe: 1-6 odkryj, Q/W = X lewa/prawa, ←/→ rundy ---
 document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT') return;
   if (e.key >= '1' && e.key <= '6') {
