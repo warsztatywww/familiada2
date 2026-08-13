@@ -88,8 +88,10 @@ export async function startServer({ port, stateFile, questionsFile }) {
       if (cmd.type === 'undo' || cmd.type === 'redo') {
         const snap = cmd.type === 'undo' ? history.undo(state) : history.redo(state);
         if (!snap) return;
+        const volume = state.volume;
         state = snap;
         state.config = config; // pytania zawsze świeże, jak przy wczytaniu z pliku
+        state.volume = volume; // głośność to ustawienie sali — undo jej nie cofa
         broadcast(null);
         return;
       }
@@ -108,9 +110,11 @@ export async function startServer({ port, stateFile, questionsFile }) {
       // to tylko sygnał "trzeba rozgłosić", nie dowód zmiany (np. repeatBuzzer
       // zwraca event bez ruszania stanu, drugi "stop timera" jest idempotentny).
       // Stan jest mały, więc porównanie przez JSON.stringify jest tanie.
-      // introVideoEnded to automat z tablicy — nie zaśmieca wierzchu stosu undo
+      // introVideoEnded to automat z tablicy, setVolume to ustawienie sali —
+      // żadne nie trafia na stos undo
       const realChange = JSON.stringify(state) !== JSON.stringify(before);
-      if (cmd.type !== 'introVideoEnded' && realChange) history.push(describeCommand(cmd, before), before);
+      const noHistory = cmd.type === 'introVideoEnded' || cmd.type === 'setVolume';
+      if (!noHistory && realChange) history.push(describeCommand(cmd, before), before);
       broadcast(event);
     });
   });
@@ -121,7 +125,7 @@ export async function startServer({ port, stateFile, questionsFile }) {
   // idempotentny, nadmiarowy broadcast jest nieszkodliwy).
   const SILENT = new Set([
     'setBank', 'setTeamName', 'timerStop',
-    'introVideoEnded', 'stopMusic', 'resetBuzzers', 'finalCover',
+    'introVideoEnded', 'stopMusic', 'resetBuzzers', 'finalCover', 'setVolume',
   ]);
   function wasSilentChange(cmd) {
     return SILENT.has(cmd.type);

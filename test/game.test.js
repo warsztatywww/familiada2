@@ -443,6 +443,27 @@ test('introStart w trakcie gry: wraca do intro, banki zostają', () => {
   assert.equal(state.teams[0].bank, 300);
 });
 
+test('setVolume: ustawia głośność bez zdarzenia', () => {
+  const state = createGame(structuredClone(CONFIG));
+  assert.equal(apply(state, { type: 'setVolume', value: 40 }), null);
+  assert.equal(state.volume, 40);
+});
+
+test('setVolume: odrzuca wartości spoza 0-100 i nie-liczby', () => {
+  const state = createGame(structuredClone(CONFIG));
+  for (const value of [-1, 101, 3.14, '50', null, undefined]) {
+    assert.equal(apply(state, { type: 'setVolume', value }), null);
+    assert.equal(state.volume, undefined);
+  }
+});
+
+test('newGame nie resetuje głośności', () => {
+  const state = freshRound(0);
+  apply(state, { type: 'setVolume', value: 40 });
+  apply(state, { type: 'newGame' });
+  assert.equal(state.volume, 40);
+});
+
 test('timerStart: odrzuca seconds === 0', () => {
   const state = freshFinal();
   const result = apply(state, { type: 'timerStart', seconds: 0, now: 1000000 });

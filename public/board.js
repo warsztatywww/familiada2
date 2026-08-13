@@ -279,6 +279,8 @@ let lastState = null; // najnowszy state — potrzebny w handlerze kliknięcia (
 function render(msg) {
   const { state } = msg;
   lastState = state;
+  const volume = (state.volume ?? 100) / 100;
+  for (const el of document.querySelectorAll('audio')) el.volume = volume;
   if (state.phase !== 'final') {
     // Pętla RAF timera finału nie może przeżyć wyjścia z widoku finału —
     // inaczej tyka i piszczy w tle nad ukrytym #final-timer.

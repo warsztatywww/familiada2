@@ -105,6 +105,10 @@ function render(msg) {
     }).join('');
   }
 
+  // głośność tablicy — nie nadpisuj w trakcie przeciągania suwaka
+  const slider = $('#volume-slider');
+  if (document.activeElement !== slider) slider.value = state.volume ?? 100;
+
   // korekty
   for (const row of document.querySelectorAll('#fix-card .row')) {
     const t = Number(row.dataset.team);
@@ -139,6 +143,8 @@ for (const box of document.querySelectorAll('.team-box')) {
 
 $('#btn-reset-buzzers').onclick = () => send({ type: 'resetBuzzers' });
 $('#btn-steal-fail').onclick = () => send({ type: 'stealFail' });
+$('#volume-slider').addEventListener('input', (e) =>
+  send({ type: 'setVolume', value: Number(e.target.value) }));
 $('#btn-intro').onclick = () => send({ type: 'introStart' });
 $('#btn-stop-music').onclick = () => send({ type: 'stopMusic' });
 $('#btn-undo').onclick = () => send({ type: 'undo' });

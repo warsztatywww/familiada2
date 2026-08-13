@@ -197,6 +197,13 @@ export function apply(state, cmd) {
       state.intro = 'off';
       return null;
     }
+    case 'setVolume': {
+      // Ustawienie nagłośnienia sali, nie stan gry — brak w createGame(),
+      // więc przeżywa newGame; serwer trzyma je też poza historią undo.
+      if (!Number.isInteger(cmd.value) || cmd.value < 0 || cmd.value > 100) return null;
+      state.volume = cmd.value;
+      return null;
+    }
     case 'newGame': {
       Object.assign(state, createGame(state.config));
       return { type: 'new-game' };
