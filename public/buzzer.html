@@ -5,30 +5,82 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 <title>Familiada — buzzer</title>
 <style>
+  /* styl reżyserki (host.css): studyjne tło, font Familiada, kolory drużyn
+     jak ramy tablicy — lewa (0) czerwona, prawa (1) niebieska */
+  @font-face { font-family: 'Familiada'; src: url('/assets/fonts/square-down.ttf'); }
+  :root {
+    --bg: #0b0d13; --panel: #151a24; --line: #29303e; --muted: #8b93a4;
+    --amber: #ffd23f; --amber-glow: rgba(255, 210, 63, 0.4);
+    --team0: #c2322a; --team1: #2a52d0;
+  }
   * { margin: 0; box-sizing: border-box; }
   html, body { height: 100%; }
   body {
-    display: grid; place-items: center;
-    font-family: system-ui, sans-serif; font-weight: 900;
-    color: #fff; text-align: center;
+    display: grid; grid-template-rows: auto 1fr auto; place-items: center;
+    font-family: system-ui, sans-serif; color: #fff; text-align: center;
     user-select: none; -webkit-user-select: none; touch-action: manipulation;
-    transition: background 0.15s;
+    background: var(--bg);
   }
-  body[data-state="czekaj"] { background: #23272f; color: #8a93a5; }
-  /* kolory drużyn jak ramy tablicy: lewa (0) czerwona, prawa (1) niebieska */
-  body[data-state="gotowy"].team-0 { background: #c2322a; }
-  body[data-state="gotowy"].team-1 { background: #2a52d0; }
-  body[data-state="wygrany"] { background: #1faa4a; }
-  body[data-state="przegrany"] { background: #17191d; color: #555; }
+  body.team-0 { background: radial-gradient(90vw 50vh at 50% -10%, rgba(194, 50, 42, 0.25), transparent 70%), var(--bg); }
+  body.team-1 { background: radial-gradient(90vw 50vh at 50% -10%, rgba(42, 82, 208, 0.28), transparent 70%), var(--bg); }
   body.disconnected::before {
-    content: 'ŁĄCZĘ…'; position: fixed; top: 12px; left: 0; right: 0; font-size: 16px; color: #ffb300;
+    content: 'ŁĄCZĘ…'; position: fixed; top: 12px; left: 0; right: 0;
+    font-size: 16px; color: var(--amber);
   }
-  #label { font-size: 14vw; line-height: 1.1; padding: 5vw; }
-  #team { position: fixed; bottom: 16px; left: 0; right: 0; font-size: 16px; font-weight: 400; opacity: 0.8; }
+
+  .brand { padding-top: 20px; line-height: 1.2; }
+  .brand strong {
+    display: block; font-family: 'Familiada', monospace; font-weight: 400;
+    color: var(--amber); text-shadow: 0 0 8px var(--amber-glow);
+    font-size: 20px; letter-spacing: 0.08em;
+  }
+  .brand span {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.35em;
+    color: var(--muted);
+  }
+
+  /* wielki okrągły przycisk — wizualnie; celem dotyku jest cały ekran */
+  #button {
+    --dome: #1a2030; --rim: var(--line); --glow: transparent;
+    width: min(78vw, 56vh); aspect-ratio: 1; border-radius: 50%;
+    display: grid; place-items: center; padding: 6%;
+    background: radial-gradient(circle at 35% 28%, color-mix(in srgb, var(--dome) 80%, #fff 20%), var(--dome) 55%, color-mix(in srgb, var(--dome) 65%, #000 35%));
+    border: 0.9vh solid var(--rim);
+    box-shadow: 0 0 9vh var(--glow), 0 2.5vh 6vh rgba(0, 0, 0, 0.6), inset 0 -2vh 4vh rgba(0, 0, 0, 0.35);
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.05s;
+  }
+  #label {
+    font-family: 'Familiada', monospace; text-transform: uppercase;
+    font-size: min(13vw, 9vh); line-height: 1.1; color: var(--muted);
+  }
+
+  body[data-state='gotowy'] #button { --glow: rgba(255, 255, 255, 0.12); }
+  body[data-state='gotowy'].team-0 #button { --dome: var(--team0); --rim: #7d1e18; --glow: rgba(194, 50, 42, 0.55); }
+  body[data-state='gotowy'].team-1 #button { --dome: var(--team1); --rim: #1c3789; --glow: rgba(42, 82, 208, 0.6); }
+  body[data-state='gotowy'] #label { color: #fff; text-shadow: 0 0 12px rgba(0, 0, 0, 0.4); }
+  body[data-state='gotowy'] #button:active { transform: scale(0.96); }
+
+  /* wygrany = bursztyn jak marker wbicia na tablicy */
+  body[data-state='wygrany'] #button { --dome: var(--amber); --rim: #a8842a; --glow: var(--amber-glow); }
+  body[data-state='wygrany'] #label { color: #0b0d13; }
+
+  body[data-state='przegrany'] #button { --dome: #12151c; --rim: #1c212b; }
+  body[data-state='przegrany'] #label { color: #4a505c; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    body[data-state='gotowy'] #button { animation: breathe 1.6s ease-in-out infinite; }
+    @keyframes breathe { 50% { box-shadow: 0 0 4vh var(--glow), 0 2.5vh 6vh rgba(0, 0, 0, 0.6), inset 0 -2vh 4vh rgba(0, 0, 0, 0.35); } }
+  }
+
+  #team { padding-bottom: 18px; font-size: 15px; color: var(--muted); }
 </style>
 </head>
 <body data-state="czekaj">
-<div id="label">CZEKAJ</div>
+<div class="brand">
+  <strong>Familiada</strong>
+  <span>buzzer</span>
+</div>
+<div id="button"><div id="label">CZEKAJ</div></div>
 <div id="team"></div>
 <script type="module">
   import { connectGame } from '/common/ws.js';

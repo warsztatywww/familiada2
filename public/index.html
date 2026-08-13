@@ -5,16 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Familiada</title>
 <style>
-  :root { --bg:#111318; --card:#1a1e26; --border:#2a2f3a; --text:#e8eaf0; --muted:#8a93a5; --accent:#ffb300; }
+  /* styl reżyserki (host.css): studyjne tło, font Familiada, kolory drużyn
+     jak ramy tablicy — lewa (0) czerwona, prawa (1) niebieska */
+  @font-face { font-family: 'Familiada'; src: url('/assets/fonts/square-down.ttf'); }
+  :root {
+    --bg: #0b0d13; --panel: #151a24; --line: #29303e;
+    --text: #e9ecf2; --muted: #8b93a4;
+    --amber: #ffd23f; --amber-glow: rgba(255, 210, 63, 0.4);
+    --team0: #c2322a; --team1: #2a52d0;
+  }
   * { box-sizing: border-box; margin: 0; }
-  body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; display: grid; place-content: center; gap: 24px; padding: 24px; }
-  h1 { text-align: center; letter-spacing: 0.3em; color: var(--accent); font-weight: 800; }
+  body {
+    color: var(--text); font-family: system-ui, sans-serif;
+    min-height: 100vh; display: grid; place-content: center; gap: 28px; padding: 24px;
+    background:
+      radial-gradient(60vw 35vh at 15% 0%, rgba(194, 50, 42, 0.14), transparent 60%),
+      radial-gradient(60vw 35vh at 85% 0%, rgba(42, 82, 208, 0.16), transparent 60%),
+      var(--bg);
+  }
+  h1 {
+    text-align: center;
+    font-family: 'Familiada', monospace; font-weight: 400;
+    font-size: 44px; letter-spacing: 0.14em;
+    color: var(--amber); text-shadow: 0 0 18px var(--amber-glow);
+  }
   /* max-width mieści 3 kafle w rzędzie — 5 widoków łamie się w 3 + 2 (buzzery razem na dole) */
   .tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; max-width: 900px; }
-  a.tile { flex: 0 1 240px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; color: var(--text); text-decoration: none; display: grid; gap: 12px; align-content: start; }
-  a.tile:hover { border-color: var(--accent); }
+  a.tile {
+    flex: 0 1 240px;
+    background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--line);
+    border-radius: 14px; padding: 20px; text-align: center;
+    color: var(--text); text-decoration: none; font-weight: 600;
+    display: grid; gap: 12px; align-content: start;
+  }
+  a.tile:hover, a.tile:focus-visible { border-color: var(--amber); outline: none; }
+  a.tile.team-0 { border-top-color: var(--team0); }
+  a.tile.team-1 { border-top-color: var(--team1); }
   .tile img { width: 160px; height: 160px; background: #fff; padding: 8px; border-radius: 8px; justify-self: center; }
-  .tile .url { color: var(--muted); font-size: 13px; word-break: break-all; }
+  .tile .url { color: var(--muted); font-size: 13px; font-weight: 400; word-break: break-all; }
   /* Węziej niż 3 kafle w rzędzie: jedna kolumna zamiast łamania po 2, które rozdzielałoby buzzery */
   @media (max-width: 899px) {
     .tiles { flex-direction: column; align-items: center; }
@@ -27,15 +55,15 @@
 <div class="tiles" id="tiles"></div>
 <script>
   const views = [
-    ['Tablica (projektor)', '/board'],
-    ['Reżyserka (sterowanie grą)', '/host'],
-    ['Scena (telefon prowadzącego)', '/stage'],
-    ['Buzzer — drużyna lewa', '/buzzer/1'],
-    ['Buzzer — drużyna prawa', '/buzzer/2'],
+    ['Tablica (projektor)', '/board', ''],
+    ['Reżyserka (sterowanie grą)', '/host', ''],
+    ['Scena (telefon prowadzącego)', '/stage', ''],
+    ['Buzzer — drużyna lewa', '/buzzer/1', 'team-0'],
+    ['Buzzer — drużyna prawa', '/buzzer/2', 'team-1'],
   ];
-  document.getElementById('tiles').innerHTML = views.map(([name, path]) => {
+  document.getElementById('tiles').innerHTML = views.map(([name, path, cls]) => {
     const url = location.origin + path;
-    return `<a class="tile" href="${path}"><strong>${name}</strong>` +
+    return `<a class="tile ${cls}" href="${path}"><strong>${name}</strong>` +
       `<img src="/qr.svg?data=${encodeURIComponent(url)}" alt="QR"><span class="url">${url}</span></a>`;
   }).join('');
 </script>
