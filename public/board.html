@@ -13,42 +13,63 @@
   </section>
 
   <!-- widok rundy -->
-  <section id="view-round" hidden>
+  <section id="view-round" class="scene" hidden>
     <div class="side" id="side-0">
       <div class="bank" id="bank-0">0</div>
       <div class="team" id="team-0"></div>
       <div class="strikes" id="strikes-0"></div>
-      <div class="buzzed-marker" id="buzzed-0">●</div>
+      <div class="buzzed-marker" id="buzzed-0"></div>
     </div>
-    <div class="panel">
-      <ol id="answers"></ol>
-      <div class="sum-row"><span>SUMA</span><span id="sum">0</span></div>
+    <div class="device">
+      <div class="mini-row">
+        <span class="rail rail-red"></span>
+        <div class="mini"><div class="cells" id="mini-round"></div></div>
+        <span class="rail rail-blue"></span>
+      </div>
+      <div class="frame">
+        <div class="screen">
+          <div class="glyphs" id="glyphs" aria-hidden="true"></div>
+          <div class="cells" id="grid"></div>
+        </div>
+      </div>
     </div>
     <div class="side" id="side-1">
       <div class="bank" id="bank-1">0</div>
       <div class="team" id="team-1"></div>
       <div class="strikes" id="strikes-1"></div>
-      <div class="buzzed-marker" id="buzzed-1">●</div>
+      <div class="buzzed-marker" id="buzzed-1"></div>
     </div>
   </section>
 
   <!-- widok finału -->
-  <section id="view-final" hidden>
-    <div class="final-panel">
-      <div id="final-rows"></div>
-      <div class="final-bottom">
-        <div class="sum-row"><span>SUMA</span><span id="final-sum">0</span></div>
-        <div id="final-timer" hidden>15</div>
+  <section id="view-final" class="scene" hidden>
+    <div class="device device--final">
+      <div class="mini-row">
+        <span class="rail rail-red"></span>
+        <div class="mini"><div class="cells" id="mini-final"></div></div>
+        <span class="rail rail-blue"></span>
+      </div>
+      <div class="frame">
+        <div class="screen">
+          <div class="cells" id="final-grid"></div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- widok końca gry -->
-  <section id="view-gameover" hidden>
-    <div class="gameover-panel">
-      <div class="go-team" id="go-team-0"><span class="name"></span><span class="score"></span></div>
-      <div class="go-team" id="go-team-1"><span class="name"></span><span class="score"></span></div>
-      <div class="go-final" id="go-final" hidden>FINAŁ: <span id="go-final-sum"></span></div>
+  <section id="view-gameover" class="scene" hidden>
+    <div class="device">
+      <div class="mini-row">
+        <span class="rail rail-red"></span>
+        <div class="mini"><div class="cells" id="mini-go"></div></div>
+        <span class="rail rail-blue"></span>
+      </div>
+      <div class="frame">
+        <div class="screen">
+          <div class="cells" id="go-grid"></div>
+        </div>
+      </div>
     </div>
   </section>
 

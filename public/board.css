@@ -1,12 +1,14 @@
 @font-face { font-family: 'Familiada'; src: url('/assets/fonts/square-down.ttf'); }
 
 :root {
-  --bg: #000;
-  --board-bg: #07120a;
-  --lit: #ffd94a;
-  --lit-glow: rgba(255, 217, 74, 0.35);
-  --unlit: #142016;
-  --x-red: #ff3b30;
+  --bg: #04050a;
+  --lit: #ffd23f;
+  --lit-glow: rgba(255, 210, 63, 0.45);
+  --screen-bg: #000;
+  --module-bg: #0c0f0a;
+  --unlit: #1f2519;
+  --frame-red: #c2322a;
+  --frame-blue: #2a52d0;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,7 +44,7 @@ body.disconnected::after {
   text-shadow: 0 0 16px var(--lit-glow); box-shadow: 0 0 24px var(--lit-glow);
   cursor: pointer;
 }
-#btn-start:hover { filter: brightness(1.3); }
+#btn-start:hover, #btn-start:focus-visible { filter: brightness(1.3); }
 #start-gate p {
   font-family: 'Familiada', monospace; text-transform: uppercase;
   font-size: 2.4vh; letter-spacing: 0.05em; opacity: 0.55;
@@ -54,85 +56,152 @@ body.disconnected::after {
 #view-intro { display: grid; place-items: center; background: #000; }
 #intro-video { width: 100vw; height: 100vh; object-fit: contain; }
 
-/* --- runda: plansza LED --- */
-#view-round {
+/* --- scena: ciemne studio z poświatą czerwoną (lewa) i niebieską (prawa) --- */
+.scene {
   display: grid;
-  grid-template-columns: 1fr minmax(0, 3fr) 1fr;
   align-items: center;
-  gap: 2vw;
-  padding: 4vh 2vw;
   background:
-    radial-gradient(circle, var(--unlit) 1.2px, transparent 1.4px) 0 0 / 6px 6px,
-    var(--board-bg);
+    radial-gradient(60vw 55vh at 8% -5%, rgba(194, 50, 42, 0.22), transparent 65%),
+    radial-gradient(60vw 55vh at 92% -5%, rgba(42, 82, 208, 0.22), transparent 65%),
+    radial-gradient(80vw 40vh at 50% 108%, rgba(20, 24, 48, 0.8), transparent 70%),
+    var(--bg);
 }
+#view-round { grid-template-columns: 1fr auto 1fr; gap: 1vw; padding: 0 1.5vw; }
+#view-final, #view-gameover { justify-items: center; }
 
-.panel { display: grid; gap: 2.2vh; }
-#answers { list-style: none; display: grid; gap: 2.2vh; }
-#answers li {
+/* --- urządzenie: mały wyświetlacz sumy + rama + matryca znakowa ---
+   Wymiary pochodzą z --cw (szerokość modułu znakowego); nadpisanie --cw na
+   .device--final przeskalowuje całość, bo pochodne liczone są na .device. */
+.device {
+  --cw: min(2.3vw, 4.2vh);
+  --ch: calc(var(--cw) * 1.38);
+  --gap: calc(var(--cw) * 0.11);
   display: grid;
-  grid-template-columns: 2ch 1fr 4ch;
-  gap: 1.5vw;
-  font-size: 5.2vh;
+  justify-items: center;
+  gap: 2vh;
+}
+.device--final { --cw: min(1.9vw, 3.5vh); }
+
+.mini-row { display: flex; align-items: center; gap: 1.4vw; width: 100%; }
+.rail { flex: 1; height: 0.5vh; border-radius: 1vh; }
+.rail-red { background: linear-gradient(90deg, transparent, var(--frame-red)); }
+.rail-blue { background: linear-gradient(90deg, var(--frame-blue), transparent); }
+.mini {
+  background: var(--screen-bg);
+  border: 0.5vh solid #1c2027;
+  border-radius: 1.3vh;
+  padding: 1vh 1.2vh;
+  box-shadow: 0 0.6vh 3vh rgba(0, 0, 0, 0.7);
+}
+
+.frame {
+  background: linear-gradient(100deg, var(--frame-red), #322a7e 52%, var(--frame-blue));
+  padding: 1.5vh;
+  border-radius: 2.8vh;
+  box-shadow: 0 1.2vh 5vh rgba(0, 0, 0, 0.65), inset 0 0 1.2vh rgba(0, 0, 0, 0.5);
+}
+.screen {
+  background: var(--screen-bg);
+  border-radius: 1.5vh;
+  padding: 1.8vh;
+  display: flex;
+  gap: calc(var(--cw) * 0.6);
+}
+
+/* --- matryca znakowa: każdy znak w osobnym module z wygaszonymi kropkami --- */
+.cells {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 28), var(--cw));
+  grid-auto-rows: var(--ch);
+  gap: var(--gap);
+}
+.cell {
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle, var(--unlit) 26%, transparent 34%) 0 0 / calc(100% / 5) calc(100% / 7),
+    var(--module-bg);
+  border-radius: 12%;
+  font-size: calc(var(--ch) * 0.82);
   line-height: 1;
-  text-shadow: 0 0 12px var(--lit-glow);
-  white-space: nowrap;
+  color: var(--lit);
+  text-shadow: 0 0 0.7vh var(--lit-glow);
 }
-#answers li .text { overflow: hidden; }
-#answers li .pts { text-align: right; }
-#answers li.hidden-answer .text, #answers li.hidden-answer .pts { opacity: 0.9; }
-#answers li.cheap { opacity: 0.65; }
+.cell.cheap { opacity: 0.55; }
+.cell.win { animation: won-flash 0.7s step-end infinite; }
 
-.sum-row {
-  display: flex; justify-content: flex-end; gap: 3vw;
-  font-size: 6.5vh; margin-top: 3vh;
-  text-shadow: 0 0 14px var(--lit-glow);
+/* --- kolumna glifów: powtarzająca się sekwencja \/ X /\ przesuwa się w dół --- */
+.glyphs {
+  display: grid;
+  grid-template-columns: calc(var(--cw) * 2);
+  grid-auto-rows: var(--ch);
+  gap: var(--gap);
+}
+.gcell {
+  position: relative;
+  background:
+    radial-gradient(circle, var(--unlit) 26%, transparent 34%) 0 0 / calc(100% / 10) calc(100% / 7),
+    var(--module-bg);
+  border-radius: 6%;
+}
+.gcell .g {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-size: calc(var(--ch) * 0.78);
+  line-height: 1;
+  text-shadow: 0 0 0.7vh var(--lit-glow);
+  opacity: 0;
+  animation: gcycle 2.7s steps(1) infinite;
+}
+.gcell:nth-child(3n+1) { --goff: 0s; }
+.gcell:nth-child(3n+2) { --goff: -0.9s; }
+.gcell:nth-child(3n)   { --goff: -1.8s; }
+.gcell .g:nth-child(1) { animation-delay: var(--goff); }
+.gcell .g:nth-child(2) { animation-delay: calc(var(--goff) + 0.9s); }
+.gcell .g:nth-child(3) { animation-delay: calc(var(--goff) + 1.8s); }
+@keyframes gcycle { 0% { opacity: 1; } 33.4% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .gcell .g { animation: none; }
+  .gcell:nth-child(3n+1) .g:nth-child(1) { opacity: 1; }
+  .gcell:nth-child(3n+2) .g:nth-child(2) { opacity: 1; }
+  .gcell:nth-child(3n)   .g:nth-child(3) { opacity: 1; }
 }
 
-/* --- boki: banki, X-y, buzzer --- */
-.side { display: grid; justify-items: center; gap: 2vh; align-content: center; }
-.bank { font-size: 7vh; text-shadow: 0 0 14px var(--lit-glow); }
-.team { font-size: 2.6vh; opacity: 0.8; }
-.strikes { color: var(--x-red); font-size: 6vh; min-height: 6vh; letter-spacing: 0.2em; text-shadow: 0 0 14px rgba(255, 59, 48, 0.5); }
-.buzzed-marker { font-size: 4vh; visibility: hidden; }
+/* --- boki: banki, nazwy drużyn, X-y, buzzer (czerwona = lewa, niebieska = prawa) --- */
+.side { display: grid; justify-items: center; gap: 1.8vh; align-content: center; }
+.bank {
+  background: var(--screen-bg);
+  border: 0.45vh solid var(--frame-red);
+  border-radius: 1.3vh;
+  padding: 1.2vh 1.8vh;
+  min-width: 11vh;
+  text-align: center;
+  font-size: 5.5vh;
+  line-height: 1;
+  text-shadow: 0 0 0.8vh var(--lit-glow);
+  box-shadow: 0 0.6vh 3vh rgba(0, 0, 0, 0.7);
+}
+#side-1 .bank { border-color: var(--frame-blue); }
+.team { font-size: 2.4vh; opacity: 0.85; text-align: center; max-width: 15vw; overflow-wrap: break-word; }
+.strikes {
+  font-size: 5vh; min-height: 5vh; letter-spacing: 0.2em;
+  text-shadow: 0 0 1vh var(--lit-glow);
+}
+.buzzed-marker {
+  width: 2.4vh; height: 2.4vh; border-radius: 50%;
+  background: var(--lit); box-shadow: 0 0 2vh var(--lit-glow);
+  visibility: hidden;
+}
 .side.buzzed .buzzed-marker { visibility: visible; animation: blink 0.8s step-end infinite; }
 @keyframes blink { 50% { opacity: 0.2; } }
 
-/* --- finał --- */
-#view-final {
-  display: grid; place-content: center; gap: 3vh; padding: 4vh 3vw;
-  background:
-    radial-gradient(circle, var(--unlit) 1.2px, transparent 1.4px) 0 0 / 6px 6px,
-    var(--board-bg);
-}
-.final-panel { display: grid; gap: 2.4vh; }
-.final-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 4ch minmax(0, 1fr) 4ch;
-  gap: 2vw; font-size: 4.6vh; line-height: 1;
-  text-shadow: 0 0 12px var(--lit-glow); white-space: nowrap;
-}
-.final-row .text { overflow: hidden; }
-.final-row .pts { text-align: right; }
-.final-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 4vh; }
-#final-timer { font-size: 10vh; text-shadow: 0 0 16px var(--lit-glow); }
-#view-final.won { animation: won-flash 0.7s step-end infinite; }
+#view-final.won .device { animation: won-flash 0.7s step-end infinite; }
 @keyframes won-flash { 50% { filter: brightness(1.6); } }
 
-/* --- koniec gry --- */
-#view-gameover {
-  display: grid; place-content: center; gap: 6vh;
-  background:
-    radial-gradient(circle, var(--unlit) 1.2px, transparent 1.4px) 0 0 / 6px 6px,
-    var(--board-bg);
-}
-.go-team { display: flex; gap: 4vw; font-size: 9vh; text-shadow: 0 0 14px var(--lit-glow); justify-content: space-between; }
-.go-team.winner { animation: won-flash 0.7s step-end infinite; }
-.go-final { font-size: 5vh; text-align: center; text-shadow: 0 0 12px var(--lit-glow); }
-
-/* --- wielki X --- */
+/* --- wielki X: rysowany bursztynem jak na monochromatycznej matrycy --- */
 #big-x {
   position: fixed; inset: 0; display: grid; place-items: center;
-  font-size: 60vh; color: var(--x-red);
-  text-shadow: 0 0 40px rgba(255, 59, 48, 0.7);
-  background: rgba(0, 0, 0, 0.55);
+  font-size: 60vh; color: var(--lit);
+  text-shadow: 0 0 6vh var(--lit-glow);
+  background: rgba(0, 0, 0, 0.65);
 }

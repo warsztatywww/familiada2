@@ -80,22 +80,71 @@ function handleEvent(event) {
   }
 }
 
+// --- matryca znakowa ---
+// Ekran to siatka modułów po jednym znaku (jak fizyczna tablica z teleturnieju):
+// widok komponuje linie tekstu o stałej szerokości, a setCells zamienia każdy
+// znak w komórkę <span class="cell">.
+
+const COLS = 28;       // matryca rundy: nr(1)+odstęp(1)+tekst(22)+odstęp(1)+pkt(3)
+const TEXT_W = COLS - 6;
+const COLS_FINAL = 34; // finał: 2 × [tekst(12)+odstęp(1)+pkt(3)] + przerwa(2)
+const ROWS = 8;        // 6 odpowiedzi + pusty wiersz + SUMA
+
+const esc = (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] ?? c);
+const chars = (s) => [...s]; // spread zamiast split — polskie znaki spoza BMP też są 1 komórką
+
+// Linia: string albo { text, cls } (klasa trafia na każdą komórkę wiersza).
+function rowHtml(line, cols) {
+  const { text, cls } = typeof line === 'string' ? { text: line, cls: '' } : line;
+  return chars(text.padEnd(cols)).slice(0, cols)
+    .map((c) => `<span class="cell${cls ? ` ${cls}` : ''}">${c === ' ' ? '' : esc(c)}</span>`)
+    .join('');
+}
+
+function setCells(el, lines, cols) {
+  el.style.setProperty('--cols', cols);
+  el.innerHTML = lines.map((l) => rowHtml(l, cols)).join('');
+}
+
+// Mały wyświetlacz nad ramą (suma rundy / timer finału).
+function setMini(el, value) {
+  setCells(el, [String(value).padStart(3)], 3);
+}
+
+const fit = (s, w) => chars(s.toUpperCase()).slice(0, w).join('').padEnd(w);
+const alignRight = (s, cols) => s.padStart(cols);
+const center = (s, cols) => s.padStart(Math.floor((cols + chars(s).length) / 2));
+const sumLine = (sum, cols) => alignRight(`SUMA ${String(sum).padStart(3)}`, cols);
+
+// Kolumna glifów przy lewej krawędzi matrycy — przesuwająca się sekwencja
+// ozdobnych znaków, jak na oryginalnej tablicy. Budowana raz; animuje CSS.
+const GLYPH_FRAMES = ['\\/', 'X', '/\\'];
+$('glyphs').innerHTML = Array.from({ length: ROWS }, () =>
+  `<div class="gcell">${GLYPH_FRAMES.map((g) => `<span class="g">${g}</span>`).join('')}</div>`
+).join('');
+
 // --- plansza rundy ---
 
-// Rząd odpowiedzi: nieodkryta = numer + kreski; odkryta = tekst + punkty;
-// tania (cheap) = przygaszona.
+// Rząd odpowiedzi: nieodkryta = numer + kropkowana linia; odkryta = tekst
+// + punkty; tania (cheap) = przygaszona; brak odpowiedzi (pytanie ma ich
+// mniej niż 6) = pusty wiersz.
+function answerLine(a, i, multiplier) {
+  if (a === undefined) return '';
+  if (!a || !a.revealed) return `${i + 1} ${'.'.repeat(COLS - 2)}`;
+  const pts = String(a.points * (a.cheap ? 1 : multiplier)).padStart(3);
+  return { text: `${i + 1} ${fit(a.text, TEXT_W)} ${pts}`, cls: a.cheap ? 'cheap' : '' };
+}
+
+function renderBoard(answers, sum, multiplier) {
+  const lines = Array.from({ length: 6 }, (_, i) => answerLine(answers[i], i, multiplier));
+  lines.push('', sumLine(sum, COLS));
+  setCells($('grid'), lines, COLS);
+  setMini($('mini-round'), sum);
+}
+
 function renderRound(state) {
   const r = state.round;
-  $('answers').innerHTML = r.answers
-    .map((a, i) => {
-      const num = i + 1;
-      if (!a.revealed) {
-        return `<li class="hidden-answer"><span>${num}</span><span class="text">${'-'.repeat(17)}</span><span class="pts">--</span></li>`;
-      }
-      return `<li class="${a.cheap ? 'cheap' : ''}"><span>${num}</span><span class="text">${a.text}</span><span class="pts">${a.points * (a.cheap ? 1 : r.multiplier)}</span></li>`;
-    })
-    .join('');
-  $('sum').textContent = r.sum;
+  renderBoard(r.answers, r.sum, r.multiplier);
   for (const t of [0, 1]) {
     $(`bank-${t}`).textContent = state.teams[t].bank;
     $(`team-${t}`).textContent = state.teams[t].name;
@@ -107,10 +156,7 @@ function renderRound(state) {
 // Pusta plansza — pokazywana w fazie 'idle', gdy intro gra w tle jako muzyka
 // (lub zostało wyciszone), a przed rundą nie ma jeszcze danych rundy.
 function renderEmptyBoard(state) {
-  $('answers').innerHTML = Array.from({ length: 6 })
-    .map((_, i) => `<li class="hidden-answer"><span>${i + 1}</span><span class="text">${'-'.repeat(17)}</span><span class="pts">--</span></li>`)
-    .join('');
-  $('sum').textContent = 0;
+  renderBoard(Array(6).fill(null), 0, 1);
   for (const t of [0, 1]) {
     $(`bank-${t}`).textContent = state.teams[t].bank;
     $(`team-${t}`).textContent = state.teams[t].name;
@@ -161,31 +207,33 @@ function renderIntro(state) {
 
 // --- finał ---
 
+const FINAL_TEXT_W = 12;
+
+// Połówka wiersza finału: tekst(12) + odstęp + punkty(3).
 function finalCell(f, player, qIndex) {
   const entry = f.entries[player][qIndex];
-  if (f.covered || entry === null) return `<span class="text">${'-'.repeat(12)}</span><span class="pts">--</span>`;
-  if (entry.answerIndex === null) return `<span class="text">${'—'.repeat(6)}</span><span class="pts">0</span>`;
+  if (f.covered || entry === null) return `${'.'.repeat(FINAL_TEXT_W)}  --`;
+  if (entry.answerIndex === null) return `${'-'.repeat(FINAL_TEXT_W)}   0`;
   const a = f.questions[qIndex].answers[entry.answerIndex];
-  return `<span class="text">${a.text}</span><span class="pts">${a.points}</span>`;
+  return `${fit(a.text, FINAL_TEXT_W)} ${String(a.points).padStart(3)}`;
 }
 
 function renderFinal(msg) {
   const f = msg.state.final;
-  $('final-rows').innerHTML = f.questions
-    .map((q, i) => `<div class="final-row">${finalCell(f, 0, i)}${finalCell(f, 1, i)}</div>`)
-    .join('');
-  $('final-sum').textContent = f.sum;
+  const lines = ['', ...f.questions.map((q, i) => `${finalCell(f, 0, i)}  ${finalCell(f, 1, i)}`)];
+  lines.push('', sumLine(f.sum, COLS_FINAL));
+  setCells($('final-grid'), lines, COLS_FINAL);
   document.getElementById('view-final').classList.toggle('won', f.won);
 
-  const timerEl = $('final-timer');
+  // Mały wyświetlacz: odliczanie, gdy timer biegnie (pętla RAF nadpisuje go
+  // co klatkę), poza tym suma finału.
   if (f.timer) {
-    timerEl.hidden = false;
     if (f.timer.startedAt !== lastTimerStart) {
       lastTimerStart = f.timer.startedAt;
       startTimerLoop(f.timer, msg.now);
     }
   } else {
-    timerEl.hidden = true;
+    setMini($('mini-final'), f.sum);
     lastTimerStart = null;
     stopTimerLoop();
   }
@@ -205,7 +253,7 @@ function startTimerLoop(timer, serverNow) {
   const tick = () => {
     const elapsed = (Date.now() - offset - timer.startedAt) / 1000;
     const remaining = Math.max(0, Math.ceil(timer.duration - elapsed));
-    $('final-timer').textContent = remaining;
+    setMini($('mini-final'), remaining);
     if (remaining === 0 && !timerDone) {
       timerDone = true;
       playSfx('snd-final-time');
@@ -221,15 +269,14 @@ function stopTimerLoop() { cancelAnimationFrame(timerRAF); }
 function renderGameover(state) {
   const winner = state.teams[0].bank === state.teams[1].bank ? null
     : state.teams[0].bank > state.teams[1].bank ? 0 : 1;
-  for (const t of [0, 1]) {
-    const el = $(`go-team-${t}`);
-    el.querySelector('.name').textContent = state.teams[t].name;
-    el.querySelector('.score').textContent = state.teams[t].bank;
-    el.classList.toggle('winner', winner === t);
-  }
-  const finalEl = $('go-final');
-  finalEl.hidden = !state.final;
-  if (state.final) $('go-final-sum').textContent = state.final.sum;
+  const teamLine = (t) => ({
+    text: `${fit(state.teams[t].name, COLS - 5)} ${String(state.teams[t].bank).padStart(4)}`,
+    cls: winner === t ? 'win' : '',
+  });
+  const lines = ['', center('KONIEC GRY', COLS), '', teamLine(0), teamLine(1)];
+  if (state.final) lines.push('', center(`FINAŁ ${state.final.sum}`, COLS));
+  setCells($('go-grid'), lines, COLS);
+  setMini($('mini-go'), state.teams[winner ?? 0].bank);
 }
 
 let lastState = null; // najnowszy state — potrzebny w handlerze kliknięcia (odblokowanie audio)
