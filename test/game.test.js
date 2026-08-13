@@ -100,6 +100,47 @@ test('choosePlayingTeam: przechodzi do gry', () => {
   assert.equal(state.round.playingTeam, 0);
 });
 
+test('choosePlayingTeam: zeruje X-y z pytania startowego', () => {
+  const state = freshRound(0);
+  apply(state, { type: 'strike', team: 0 });
+  apply(state, { type: 'strike', team: 1 });
+  apply(state, { type: 'choosePlayingTeam', team: 0 });
+  assert.deepEqual(state.round.strikes, [0, 0]);
+});
+
+test('strike w play: odrzucany dla drużyny niegrającej', () => {
+  const state = freshRound(0);
+  apply(state, { type: 'choosePlayingTeam', team: 0 });
+  assert.equal(apply(state, { type: 'strike', team: 1 }), null);
+  assert.deepEqual(state.round.strikes, [0, 0]);
+});
+
+test('strike w buzzers: dozwolony dla obu drużyn', () => {
+  const state = freshRound(0);
+  assert.equal(apply(state, { type: 'strike', team: 0 }).type, 'strike');
+  assert.equal(apply(state, { type: 'strike', team: 1 }).type, 'strike');
+  assert.deepEqual(state.round.strikes, [1, 1]);
+});
+
+test('awardSum: odrzucany w stage buzzers', () => {
+  const state = freshRound(0);
+  apply(state, { type: 'reveal', index: 0 });
+  assert.equal(apply(state, { type: 'awardSum', team: 1 }), null);
+  assert.equal(state.round.stage, 'buzzers');
+  assert.equal(state.teams[1].bank, 0);
+});
+
+test('introStart: odrzucany poza fazą idle', () => {
+  const state = freshRound(0);
+  assert.equal(apply(state, { type: 'introStart' }), null);
+  assert.equal(state.intro, 'off');
+});
+
+test('repeatBuzzer: odrzucany poza finałem', () => {
+  const state = freshRound(0);
+  assert.equal(apply(state, { type: 'repeatBuzzer' }), null);
+});
+
 test('strike: trzeci X grającej drużyny przełącza na przejęcie', () => {
   const state = freshRound(0);
   apply(state, { type: 'choosePlayingTeam', team: 0 });
@@ -195,6 +236,7 @@ test('unstrike: cofa X i wychodzi z przejęcia', () => {
 
 test('awardSum: ręczne przyznanie', () => {
   const state = freshRound(0);
+  apply(state, { type: 'choosePlayingTeam', team: 0 });
   apply(state, { type: 'reveal', index: 0 });
   const ev = apply(state, { type: 'awardSum', team: 1 });
   assert.equal(ev.type, 'sum-awarded');

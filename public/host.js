@@ -46,7 +46,10 @@ function render(state) {
     box.querySelector('.bank-value').textContent = state.teams[t].bank;
     box.querySelector('.strikes-view').textContent = inRound ? 'X'.repeat(r.strikes[t]) : '';
     box.querySelector('.btn-play').disabled = !inRound || r.stage !== 'buzzers';
-    box.querySelector('.btn-strike').disabled = !inRound || (r.stage !== 'buzzers' && r.stage !== 'play');
+    box.querySelector('.btn-strike').disabled = !inRound ||
+      (r.stage !== 'buzzers' && r.stage !== 'play') ||
+      (r.stage === 'play' && t !== r.playingTeam);
+    box.querySelector('.btn-award').disabled = !inRound || (r.stage !== 'play' && r.stage !== 'steal');
     box.querySelector('.btn-unstrike').disabled = !inRound || r.strikes[t] === 0;
   }
 
@@ -110,6 +113,7 @@ for (const box of document.querySelectorAll('.team-box')) {
   box.querySelector('.btn-strike').onclick = () => send({ type: 'strike', team: t });
   box.querySelector('.btn-unstrike').onclick = () => send({ type: 'unstrike', team: t });
   box.querySelector('.btn-play').onclick = () => send({ type: 'choosePlayingTeam', team: t });
+  box.querySelector('.btn-award').onclick = () => send({ type: 'awardSum', team: t });
 }
 
 $('#btn-reset-buzzers').onclick = () => send({ type: 'resetBuzzers' });

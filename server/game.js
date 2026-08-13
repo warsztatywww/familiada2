@@ -61,6 +61,8 @@ export function apply(state, cmd) {
     case 'choosePlayingTeam': {
       if (state.phase !== 'round' || round.stage !== 'buzzers' || !isTeam(cmd.team)) return null;
       round.playingTeam = cmd.team;
+      // X-y z pytania startowego to tylko sygnał "pudło" — gra właściwa startuje od zera
+      round.strikes = [0, 0];
       round.stage = 'play';
       return { type: 'play-start', team: cmd.team };
     }
@@ -94,7 +96,8 @@ export function apply(state, cmd) {
       return { type: 'steal-fail', team: 1 - round.playingTeam };
     }
     case 'awardSum': {
-      if (state.phase !== 'round' || round.stage === 'done' || !isTeam(cmd.team)) return null;
+      if (state.phase !== 'round' || !isTeam(cmd.team)) return null;
+      if (round.stage !== 'play' && round.stage !== 'steal') return null;
       awardSumTo(state, cmd.team);
       return { type: 'sum-awarded', team: cmd.team };
     }
@@ -132,6 +135,7 @@ export function apply(state, cmd) {
     case 'strike': {
       if (state.phase !== 'round' || !isTeam(cmd.team)) return null;
       if (round.stage !== 'buzzers' && round.stage !== 'play') return null;
+      if (round.stage === 'play' && cmd.team !== round.playingTeam) return null;
       if (round.strikes[cmd.team] >= 3) return null;
       round.strikes[cmd.team] += 1;
       if (round.stage === 'play' && cmd.team === round.playingTeam && round.strikes[cmd.team] === 3) {
@@ -196,8 +200,10 @@ export function apply(state, cmd) {
       return null;
     }
     case 'repeatBuzzer':
+      if (state.phase !== 'final') return null;
       return { type: 'repeat' };
     case 'introStart': {
+      if (state.phase !== 'idle') return null;
       state.intro = 'video';
       return { type: 'intro' };
     }
