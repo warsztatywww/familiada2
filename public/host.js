@@ -5,7 +5,7 @@ let current = null; // ostatni snapshot
 
 const game = connectGame((msg) => {
   current = msg;
-  render(msg.state);
+  render(msg);
 });
 const send = (cmd) => game.send(cmd);
 
@@ -16,7 +16,8 @@ const STAGE_LABELS = {
   done: 'KONIEC RUNDY',
 };
 
-function render(state) {
+function render(msg) {
+  const state = msg.state;
   const r = state.round;
   const inRound = state.phase === 'round';
 
@@ -98,6 +99,14 @@ function render(state) {
       row.querySelector('.bank-input').value = state.teams[t].bank;
     }
   }
+
+  // undo/redo
+  const undoBtn = $('#btn-undo');
+  undoBtn.disabled = !msg.undoLabel;
+  undoBtn.textContent = msg.undoLabel ? `⟲ COFNIJ: ${msg.undoLabel}` : '⟲ COFNIJ';
+  const redoBtn = $('#btn-redo');
+  redoBtn.disabled = !msg.redoLabel;
+  redoBtn.textContent = msg.redoLabel ? `⟳ PONÓW: ${msg.redoLabel}` : '⟳ PONÓW';
 }
 
 // --- akcje ---
@@ -121,6 +130,8 @@ $('#btn-reset-buzzers').onclick = () => send({ type: 'resetBuzzers' });
 $('#btn-steal-fail').onclick = () => send({ type: 'stealFail' });
 $('#btn-intro').onclick = () => send({ type: 'introStart' });
 $('#btn-stop-music').onclick = () => send({ type: 'stopMusic' });
+$('#btn-undo').onclick = () => send({ type: 'undo' });
+$('#btn-redo').onclick = () => send({ type: 'redo' });
 $('#btn-new-round').onclick = () => send({ type: 'newRound', roundIndex: current?.state.roundIndex ?? 0 });
 $('#btn-prev-round').onclick = () => send({ type: 'newRound', roundIndex: current.state.roundIndex - 1 });
 $('#btn-next-round').onclick = () =>
