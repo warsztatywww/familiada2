@@ -34,6 +34,13 @@ body.disconnected::after {
   font-size: 2vh; letter-spacing: 0.05em; opacity: 0.45;
   text-transform: none; z-index: 10;
 }
+#btn-fullscreen {
+  position: fixed; bottom: 1.5vh; right: 1.5vw; z-index: 10;
+  background: none; border: 1px solid rgba(255, 217, 74, 0.25); border-radius: 6px;
+  color: var(--lit); font-size: 3vh; line-height: 1; padding: 0.6vh 1vh;
+  opacity: 0.35; cursor: pointer;
+}
+#btn-fullscreen:hover { opacity: 1; }
 
 #board, #board > section { height: 100vh; }
 

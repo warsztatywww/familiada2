@@ -11,7 +11,9 @@ function show(viewId) {
 // --- dźwięki i wielki X ---
 
 const audioCtx = new AudioContext();
+function showAudioHint() { $('audio-hint').hidden = false; }
 function beep(freq, ms, gainVal = 0.3) {
+  if (audioCtx.state !== 'running') showAudioHint();
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.frequency.value = freq;
@@ -25,7 +27,7 @@ function beep(freq, ms, gainVal = 0.3) {
 function play(id) {
   const el = $(id);
   el.currentTime = 0;
-  el.play().catch(() => {}); // autoplay-block przed pierwszą interakcją — trudno
+  el.play().catch(showAudioHint); // autoplay-block przed pierwszym gestem — pokaż podpowiedź
 }
 
 let xTimeout = null;
@@ -64,6 +66,18 @@ function handleEvent(event) {
     case 'cheap-reveal':
       beep(440, 80, 0.12);
       break;
+    case 'intro': {
+      // Ponowne kliknięcie "Intro" w trakcie odtwarzania = replay od początku
+      // (renderIntro tego nie zrobi — stan 'video' się nie zmienia).
+      if (lastState?.phase !== 'idle') break;
+      const video = $('intro-video');
+      const music = $('snd-intro');
+      video.currentTime = 0;
+      video.play().catch(() => {});
+      music.currentTime = 0;
+      music.play().catch(showAudioHint);
+      break;
+    }
   }
 }
 
@@ -108,6 +122,16 @@ function renderEmptyBoard(state) {
 
 // --- intro ---
 
+// Po odświeżeniu tablicy w stanie 'music' wideo ładuje się od zera — dosuwamy
+// je na koniec, żeby pokazać ostatnią klatkę czołówki (po naturalnym 'ended'
+// wideo i tak stoi na ostatniej klatce, seek jest wtedy no-opem).
+function freezeOnLastFrame(video) {
+  const seek = () => { if (video.duration) video.currentTime = Math.max(0, video.duration - 0.05); };
+  video.pause();
+  if (video.readyState >= 1) seek();
+  else video.addEventListener('loadedmetadata', seek, { once: true });
+}
+
 let introShown = null; // ostatnio zastosowany stan intro
 function renderIntro(state) {
   if (state.intro === introShown) return;
@@ -119,7 +143,7 @@ function renderIntro(state) {
     video.currentTime = 0;
     video.play();
     music.currentTime = 0;
-    music.play().catch(() => {});
+    music.play().catch(showAudioHint);
   } else if (state.intro === 'idle') {
     show('view-intro'); // pierwsza klatka: video spauzowane na 0
     video.pause();
@@ -127,13 +151,13 @@ function renderIntro(state) {
   } else if (state.intro === 'off') {
     music.pause();
   } else if (state.intro === 'music') {
-    // Po odświeżeniu tablicy w trakcie 'music' snapshot startowy ląduje tu
-    // bezpośrednio (bez przejścia przez 'video') — trzeba dograć muzykę.
-    // Nie resetujemy currentTime: wznowienie w środku utworu jest ok, a po
-    // odświeżeniu i tak zaczyna się od 0.
-    if (music.paused) music.play().catch(() => {});
+    // Wideo skończone: na tablicy zostaje ostatnia klatka, muzyka gra dalej.
+    // Po odświeżeniu strony snapshot ląduje tu bez przejścia przez 'video' —
+    // trzeba dograć muzykę (bez resetu currentTime; po reloadzie i tak od 0).
+    show('view-intro');
+    freezeOnLastFrame(video);
+    if (music.paused) music.play().catch(showAudioHint);
   }
-  // widok dla 'music' przełącza render() (pusta plansza)
 }
 
 // --- finał ---
@@ -224,7 +248,7 @@ function render(msg) {
     // (np. 'music' -> 'off' ma wyciszyć muzykę), nawet gdy to render()
     // decyduje, który widok pokazać.
     renderIntro(state);
-    if (state.intro !== 'idle' && state.intro !== 'video') {
+    if (state.intro === 'off') {
       show('view-round');
       renderEmptyBoard(state);
     }
@@ -255,15 +279,29 @@ $('intro-video').addEventListener('ended', () => game.send({ type: 'introVideoEn
 // --- odblokowanie audio po pierwszym geście użytkownika ---
 
 const audioHint = $('audio-hint');
-if (audioHint) {
-  setTimeout(() => { audioHint.hidden = true; }, 5000);
-  document.addEventListener('click', () => {
-    audioCtx.resume();
-    audioHint.hidden = true;
-    // Świeży snapshot po odświeżeniu strony w trakcie intro === 'music'
-    // trafia do renderIntro() zanim padnie pierwszy gest użytkownika —
-    // przeglądarka blokuje wtedy music.play(); doganiamy to tutaj.
-    const music = $('snd-intro');
-    if (lastState?.intro === 'music' && music.paused) music.play().catch(() => {});
-  }, { once: true });
-}
+setTimeout(() => { audioHint.hidden = true; }, 5000);
+// Podpowiedź wraca (showAudioHint) przy każdej zablokowanej próbie odtwarzania
+// i znika dopiero po kliknięciu, które odblokowuje audio.
+document.addEventListener('click', () => {
+  audioCtx.resume();
+  audioHint.hidden = true;
+  // Ciągłe audio intro zablokowane przez autoplay doganiamy po geście:
+  // w trakcie wideo synchronizujemy muzykę do jego pozycji.
+  const music = $('snd-intro');
+  const video = $('intro-video');
+  if (lastState?.phase === 'idle' && music.paused) {
+    if (lastState.intro === 'video') {
+      music.currentTime = video.currentTime;
+      music.play().catch(() => {});
+    } else if (lastState.intro === 'music') {
+      music.play().catch(() => {});
+    }
+  }
+});
+
+// --- pełny ekran ---
+
+$('btn-fullscreen').addEventListener('click', () => {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen().catch(() => {});
+});

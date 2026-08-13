@@ -46,6 +46,10 @@ export async function startServer({ port, stateFile, questionsFile }) {
 
   const httpServer = createServer(app);
   const wss = new WebSocketServer({ server: httpServer });
+  // WebSocketServer forwarduje błędy httpServer (np. EADDRINUSE) jako własny
+  // event 'error' — bez listenera nieobsłużony event ubija proces, zanim
+  // zadziała reject/przyjazny komunikat CLI. Właściwą obsługę robi httpServer.
+  wss.on('error', () => {});
 
   function snapshot(event) {
     return JSON.stringify({ type: 'state', seq, now: Date.now(), event, state });
