@@ -77,7 +77,57 @@ export function apply(state, cmd) {
         }
         return { type: 'reveal', index: cmd.index };
       }
-      return null; // stage 'steal' i 'done' — Task 4
+      if (round.stage === 'steal') {
+        answer.revealed = true;
+        round.sum += answer.points * round.multiplier;
+        awardSumTo(state, 1 - round.playingTeam);
+        return { type: 'steal-success', team: round.sumWinner };
+      }
+      // stage 'done': tanie odkrycie
+      answer.revealed = true;
+      answer.cheap = true;
+      return { type: 'cheap-reveal', index: cmd.index };
+    }
+    case 'stealFail': {
+      if (state.phase !== 'round' || round.stage !== 'steal') return null;
+      awardSumTo(state, round.playingTeam);
+      return { type: 'steal-fail', team: 1 - round.playingTeam };
+    }
+    case 'awardSum': {
+      if (state.phase !== 'round' || round.stage === 'done' || !isTeam(cmd.team)) return null;
+      awardSumTo(state, cmd.team);
+      return { type: 'sum-awarded', team: cmd.team };
+    }
+    case 'hide': {
+      if (state.phase !== 'round') return null;
+      const answer = round.answers[cmd.index];
+      if (!answer || !answer.revealed) return null;
+      if (answer.cheap) {
+        answer.revealed = false;
+        answer.cheap = false;
+        return null;
+      }
+      if (round.stage === 'done' || round.stage === 'steal') return null;
+      answer.revealed = false;
+      round.sum -= answer.points * round.multiplier;
+      return null;
+    }
+    case 'unstrike': {
+      if (state.phase !== 'round' || !isTeam(cmd.team)) return null;
+      if (round.strikes[cmd.team] <= 0) return null;
+      round.strikes[cmd.team] -= 1;
+      if (round.stage === 'steal' && cmd.team === round.playingTeam) round.stage = 'play';
+      return null;
+    }
+    case 'setBank': {
+      if (!isTeam(cmd.team) || !Number.isInteger(cmd.value) || cmd.value < 0) return null;
+      state.teams[cmd.team].bank = cmd.value;
+      return null;
+    }
+    case 'setTeamName': {
+      if (!isTeam(cmd.team) || typeof cmd.name !== 'string' || !cmd.name.trim()) return null;
+      state.teams[cmd.team].name = cmd.name.trim();
+      return null;
     }
     case 'strike': {
       if (state.phase !== 'round' || !isTeam(cmd.team)) return null;
