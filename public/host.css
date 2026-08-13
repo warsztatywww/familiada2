@@ -1,59 +1,244 @@
+/* Reżyserka — panel sterowania grą. Język wizualny zapożyczony z tablicy
+   (board.css): czarne wyświetlacze LED z fontem Familiada i bursztynową
+   poświatą, kolory drużyn z ram tablicy (lewa czerwona, prawa niebieska). */
+@font-face { font-family: 'Familiada'; src: url('/assets/fonts/square-down.ttf'); }
+
 :root {
-  --bg: #111318; --card: #1a1e26; --border: #2a2f3a;
-  --text: #e8eaf0; --muted: #8a93a5; --accent: #ffb300;
-  --team0: #3d8bfd; --team1: #ff4d4d;
+  --bg: #0b0d13;
+  --panel: #151a24;
+  --panel-2: #1a2030;
+  --inset: #05070b;
+  --line: #29303e;
+  --text: #e9ecf2;
+  --muted: #8b93a4;
+  --amber: #ffd23f;
+  --amber-glow: rgba(255, 210, 63, 0.4);
+  /* drużyna 0 = lewa = czerwona rama tablicy, 1 = prawa = niebieska */
+  --team0: #d43a30;
+  --team1: #4168e4;
+  --green: #2f7a3d;
+  --green-bg: #17251a;
 }
+
 * { box-sizing: border-box; margin: 0; }
 /* .card ustawia display: grid bezwarunkowo, co przebiłoby domyślne
    [hidden] { display: none } — wymuszamy jawnie (patrz też board.css). */
 [hidden] { display: none !important; }
+
 body {
-  background: var(--bg); color: var(--text);
+  color: var(--text);
   font-family: system-ui, sans-serif;
   display: grid; grid-template-rows: auto 1fr auto; min-height: 100vh;
+  /* delikatna czerwono-niebieska poświata studia jak na tablicy (.scene) */
+  background:
+    radial-gradient(55vw 32vh at 0% 0%, rgba(212, 58, 48, 0.08), transparent 60%),
+    radial-gradient(55vw 32vh at 100% 0%, rgba(65, 104, 228, 0.09), transparent 60%),
+    var(--bg);
 }
 body.disconnected::before {
   content: 'BRAK POŁĄCZENIA — łączę ponownie…';
   display: block; background: #7a1f1f; color: #fff; text-align: center; padding: 6px;
+  grid-column: 1 / -1;
 }
-header, footer { display: flex; gap: 12px; align-items: center; padding: 12px 16px; border-block: 1px solid var(--border); }
+
+/* --- pasek górny i dolny --- */
+header, footer {
+  display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  padding: 10px 16px;
+  background: var(--panel); border-block: 1px solid var(--line);
+}
 .spacer { flex: 1; }
-#stage-badge { background: var(--accent); color: #000; font-weight: 800; padding: 8px 14px; border-radius: 8px; letter-spacing: 0.06em; }
-main { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; padding: 16px; align-items: start; }
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: grid; gap: 12px; }
+.cluster { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+.brand { display: grid; line-height: 1.15; }
+.brand strong {
+  font-family: 'Familiada', monospace; font-weight: 400;
+  color: var(--amber); text-shadow: 0 0 8px var(--amber-glow);
+  font-size: 17px; letter-spacing: 0.08em;
+}
+.brand span {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.32em;
+  color: var(--muted);
+}
+
+/* --- wyświetlacze LED (sygnatura panelu, jak ekrany tablicy) --- */
+.led {
+  font-family: 'Familiada', monospace; text-transform: uppercase;
+  background: var(--inset); color: var(--amber);
+  text-shadow: 0 0 8px var(--amber-glow);
+  border: 1px solid #1a1f29; border-radius: 8px;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+#led-status {
+  display: flex; gap: 20px; align-items: baseline;
+  padding: 9px 16px 7px; min-height: 44px; font-size: 20px;
+}
+#round-info { font-size: 13px; opacity: 0.65; white-space: nowrap; }
+.led-num {
+  display: inline-block; padding: 5px 12px 3px;
+  font-size: 22px; min-width: 4ch; text-align: right;
+}
+
+/* --- przyciski --- */
 button {
-  min-height: 56px; padding: 8px 18px; font-size: 16px; font-weight: 600;
-  background: #232836; color: var(--text); border: 1px solid var(--border); border-radius: 10px;
+  min-height: 52px; padding: 8px 16px;
+  font: 600 15px/1.25 system-ui, sans-serif;
+  color: var(--text);
+  background: linear-gradient(#242b3c, #1c2230);
+  border: 1px solid var(--line); border-radius: 10px;
   cursor: pointer; touch-action: manipulation;
 }
-button:hover { border-color: var(--accent); }
-button:disabled { opacity: 0.35; cursor: default; }
-button.danger { background: #3a1717; border-color: #7a1f1f; }
+button:hover:not(:disabled) { border-color: var(--amber); }
+button:active:not(:disabled) { transform: translateY(1px); }
+button:disabled { opacity: 0.3; cursor: default; }
+button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+button.danger { background: linear-gradient(#3a1a17, #2c1412); border-color: #7a2a1f; }
+button.danger:hover:not(:disabled) { border-color: #c2322a; }
+
+.eyebrow {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--muted);
+}
+
 .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* --- układ główny: pytanie | drużyny, korekty pod drużynami, finał na całą
+   szerokość --- */
+main {
+  display: grid; grid-template-columns: 3fr 2fr; gap: 14px; padding: 14px;
+  grid-template-areas:
+    'question teams'
+    'question fix'
+    'final    final';
+  align-items: start; align-content: start;
+}
+#question-card { grid-area: question; }
+#teams-card { grid-area: teams; }
+#fix-card { grid-area: fix; }
+#final-card { grid-area: final; }
+
+/* w finale pytania rundy nie ma — finał przejmuje lewą kolumnę, a konsole
+   drużyn chudną do nazwy i banku (akcje rundy i tak są nieaktywne) */
+body.final main {
+  grid-template-areas:
+    'final teams'
+    'final fix';
+}
+body.final .team-box button,
+body.final #teams-card > .row { display: none; }
+
+.card {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 14px; padding: 16px; display: grid; gap: 12px;
+}
+
+/* --- pytanie i odpowiedzi --- */
+#question-text { font-size: 24px; line-height: 1.3; }
 #host-answers { list-style: none; display: grid; gap: 8px; padding: 0; }
 #host-answers button.answer {
-  width: 100%; display: grid; grid-template-columns: 2ch 1fr auto; gap: 12px;
-  text-align: left; align-items: center;
+  width: 100%; min-height: 56px;
+  display: grid; grid-template-columns: 34px 1fr auto; gap: 12px;
+  text-align: left; align-items: center; font-size: 16px; font-weight: 600;
 }
-#host-answers button.answer.revealed { background: #1d3021; border-color: #2f7a3d; }
-#host-answers button.answer.cheap { opacity: 0.6; }
-.team-box { border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: grid; gap: 10px; }
-.team-box[data-team="0"] { border-left: 6px solid var(--team0); }
-.team-box[data-team="1"] { border-left: 6px solid var(--team1); }
-.strikes-view { color: #ff5b52; font-size: 28px; min-height: 32px; letter-spacing: 0.2em; }
-#question-text { font-size: 22px; }
-@media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+#host-answers button.answer > span:first-child {
+  display: grid; place-items: center; width: 34px; height: 34px;
+  border: 1px solid var(--line); border-radius: 8px;
+  color: var(--muted); font-weight: 700;
+}
+#host-answers button.answer strong {
+  font-family: 'Familiada', monospace; font-weight: 400;
+  font-size: 20px; color: var(--amber); opacity: 0.45;
+  min-width: 3ch; text-align: right;
+}
+#host-answers button.answer.revealed { background: var(--green-bg); border-color: var(--green); }
+#host-answers button.answer.revealed > span:first-child { border-color: var(--green); color: #6dbd7c; }
+#host-answers button.answer.revealed strong { opacity: 1; text-shadow: 0 0 8px var(--amber-glow); }
+#host-answers button.answer.cheap { opacity: 0.5; }
+
+#sum-row { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--line); padding-top: 12px; }
+#sum-row .mult { color: var(--muted); font-weight: 700; }
+
+/* --- konsole drużyn --- */
+#teams-card { grid-template-columns: 1fr 1fr; }
+#teams-card > .row, #buzzer-status { grid-column: 1 / -1; }
+.team-box {
+  --tc: var(--team0); --tc-dim: rgba(212, 58, 48, 0.09);
+  border: 1px solid var(--line); border-top: 3px solid var(--tc);
+  border-radius: 12px; padding: 12px;
+  background: linear-gradient(var(--tc-dim), transparent 45%), var(--panel-2);
+  display: grid; gap: 10px; align-content: start;
+}
+.team-box[data-team='1'] { --tc: var(--team1); --tc-dim: rgba(65, 104, 228, 0.11); }
+/* drużyna, która właśnie gra / przejmuje */
+.team-box.active { border-color: var(--tc); box-shadow: 0 0 16px var(--tc-dim); }
+.team-name { font-size: 17px; font-weight: 800; overflow-wrap: break-word; }
+.bank { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.bank .bank-value { border-color: var(--tc); }
+.strikes-view {
+  font-family: 'Familiada', monospace; font-size: 26px; letter-spacing: 0.35em;
+  color: var(--amber); text-shadow: 0 0 8px var(--amber-glow);
+  min-height: 30px; line-height: 1;
+}
+.team-box button { width: 100%; }
+.team-box .btn-play:not(:disabled) { border-color: var(--amber); color: var(--amber); }
+
+#buzzer-status { min-height: 24px; display: flex; align-items: center; gap: 10px; font-weight: 600; }
+#buzzer-status:empty { display: none; }
+#buzzer-status.armed::before {
+  content: ''; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--amber); box-shadow: 0 0 10px var(--amber-glow);
+}
+#buzzer-status.buzzed { font-size: 17px; font-weight: 800; }
+#buzzer-status.buzzed.team-0 { color: #ff7166; }
+#buzzer-status.buzzed.team-1 { color: #8fa5ff; }
+#btn-steal-fail:not(:disabled) { border-color: var(--amber); color: var(--amber); }
+
+/* --- finał --- */
 #final-questions { display: grid; gap: 14px; }
-.final-q { border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: grid; gap: 8px; }
+.final-q {
+  border: 1px solid var(--line); border-radius: 12px; padding: 12px;
+  background: var(--panel-2); display: grid; gap: 8px;
+}
 .final-q h4 { font-size: 16px; }
 .final-q .players { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.final-q .player { display: grid; gap: 6px; }
+.final-q .player { display: grid; gap: 6px; align-content: start; }
 .final-q .player > span:not(.chosen) { color: var(--muted); font-size: 13px; }
 .final-q button { min-height: 44px; font-size: 14px; }
 .final-q button.used { opacity: 0.35; text-decoration: line-through; }
 .final-q .chosen {
-  background: #1d3021; border: 1px solid #2f7a3d; border-radius: 10px;
+  background: var(--green-bg); border: 1px solid var(--green); border-radius: 10px;
   display: inline-block; padding: 0.4rem 0.6rem;
   color: var(--text); font-size: 14px;
 }
-input { min-height: 44px; background: #0d0f13; border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 0 10px; font-size: 16px; }
+
+/* --- korekty --- */
+#fix-card summary { cursor: pointer; color: var(--muted); font-weight: 600; }
+#fix-card details { display: grid; gap: 10px; }
+#fix-card details[open] summary { margin-bottom: 10px; }
+#fix-card label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+input {
+  min-height: 44px; background: var(--inset); border: 1px solid var(--line);
+  color: var(--text); border-radius: 8px; padding: 0 10px; font-size: 16px;
+}
+input:focus-visible { outline: 2px solid var(--amber); outline-offset: 1px; }
+.name-input { width: 14ch; }
+.bank-input { width: 9ch; }
+
+@media (prefers-reduced-motion: no-preference) {
+  #buzzer-status.armed::before { animation: pulse 1.1s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.25; } }
+}
+
+@media (max-width: 1000px) {
+  /* body.final main z układu dwukolumnowego ma wyższą specyficzność —
+     bez jawnego nadpisania wygrałby i dorobił niejawną drugą kolumnę */
+  main, body.final main {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'question' 'teams' 'fix' 'final';
+  }
+  #led-status { font-size: 17px; }
+}
+@media (max-width: 460px) {
+  #teams-card { grid-template-columns: 1fr; }
+  #teams-card > .row, #buzzer-status { grid-column: auto; }
+}

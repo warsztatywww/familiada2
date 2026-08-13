@@ -15,8 +15,9 @@
     transition: background 0.15s;
   }
   body[data-state="czekaj"] { background: #23272f; color: #8a93a5; }
-  body[data-state="gotowy"].team-0 { background: #3d8bfd; }
-  body[data-state="gotowy"].team-1 { background: #ff4d4d; }
+  /* kolory drużyn jak ramy tablicy: lewa (0) czerwona, prawa (1) niebieska */
+  body[data-state="gotowy"].team-0 { background: #c2322a; }
+  body[data-state="gotowy"].team-1 { background: #2a52d0; }
   body[data-state="wygrany"] { background: #1faa4a; }
   body[data-state="przegrany"] { background: #17191d; color: #555; }
   body.disconnected::before {

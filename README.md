@@ -1,7 +1,8 @@
 # Familiada 2
 
 Domowa wersja teleturnieju „Familiada" na jeden wieczór: serwer Node.js +
-przeglądarkowa tablica (projektor), panel prowadzącego i buzzery na
+przeglądarkowa tablica (projektor), reżyserka (panel sterowania grą),
+widok sceny dla prowadzącego i buzzery na
 telefonach/tabletach — wszystko połączone przez WebSocket w lokalnej sieci.
 
 ## Uruchomienie
@@ -18,8 +19,8 @@ i kodami QR do wszystkich widoków:
 
 - **Tablica (projektor):** `/board` — podłącz do projektora/telewizora i
   włącz pełny ekran (**F11** w przeglądarce).
-- **Panel prowadzącego:** `/host` — otwórz z laptopa albo tabletu w tej
-  samej sieci.
+- **Reżyserka (sterowanie grą):** `/host` — panel operatora; otwórz
+  z laptopa albo tabletu w tej samej sieci.
 - **Scena (prowadzący):** `/stage` — widok na telefon prowadzącego
   występującego na scenie: aktualne pytanie, kto się wbił na buzzerze
   i która drużyna odpowiada (w finale — lista 5 pytań).
@@ -36,14 +37,14 @@ Zmienne środowiskowe (opcjonalne, z wartościami domyślnymi):
 | `QUESTIONS_FILE`| `questions.json`  | plik z pytaniami (patrz niżej)      |
 
 **Uwaga o sieci:** wszystkie urządzenia (laptop z serwerem, projektor,
-panel, buzzery) muszą być w **tej samej sieci lokalnej** (np. ten sam
-Wi-Fi). Jeśli buzzery/panel nie mogą się połączyć z innego urządzenia niż
+reżyserka, buzzery) muszą być w **tej samej sieci lokalnej** (np. ten sam
+Wi-Fi). Jeśli buzzery/reżyserka nie mogą się połączyć z innego urządzenia niż
 ten, na którym działa serwer, sprawdź **firewall** — port **3000/TCP** musi
 być odblokowany dla połączeń przychodzących z sieci lokalnej.
 
 ## Sterowanie
 
-### Skróty klawiszowe panelu (`/host`)
+### Skróty klawiszowe reżyserki (`/host`)
 
 | Klawisz   | Akcja                                            |
 |-----------|---------------------------------------------------|
@@ -56,7 +57,7 @@ być odblokowany dla połączeń przychodzących z sieci lokalnej.
 Skróty są nieaktywne, gdy fokus jest w polu tekstowym (np. w sekcji
 „Korekty").
 
-### Przyciski panelu
+### Przyciski reżyserki
 
 - **Intro** — odpala wideo czołówki, po nim leci muzyka w tle na tablicy.
 - **Stop muzykę** — ucina muzykę intra.
@@ -135,7 +136,7 @@ im nie odpowiada):
   liczba całkowita, domyślnie `1` — mnoży punkty odpowiedzi w tej rundzie).
 - `final` — opcjonalna; jeśli podana i niepusta, musi mieć **dokładnie 5**
   pytań (każde jak wyżej, bez `multiplier`). Pusta tablica lub brak pola
-  oznacza brak finału — przycisk „Finał" w panelu będzie wtedy nieaktywny.
+  oznacza brak finału — przycisk „Finał" w reżyserce będzie wtedy nieaktywny.
 
 ## Dźwięk
 
@@ -152,14 +153,14 @@ Stan gry jest zapisywany do `state.json` po każdej zmianie. Serwer można
 bezpiecznie zabić (Ctrl+C) i uruchomić ponownie w dowolnym momencie —
 `npm start` wczyta ostatni zapisany stan i gra wraca dokładnie w to samo
 miejsce (pytania są wtedy wczytywane na nowo z `questions.json`, reszta
-stanu z `state.json`). Wszystkie podłączone widoki (tablica, panel,
+stanu z `state.json`). Wszystkie podłączone widoki (tablica, reżyserka,
 buzzery) same się przełączają w tryb łączenia i wracają po ponownym
 starcie serwera — nic nie trzeba ręcznie odświeżać.
 
 Aby zacząć zupełnie od zera (np. inna gra, inny plik pytań), skasuj
 `state.json` przed uruchomieniem serwera — plik jest ignorowany przez git
 (`.gitignore`), więc nie trzeba tego cofać w repo. Ten sam efekt daje
-przycisk **„Nowa gra"** w panelu, bez restartu serwera.
+przycisk **„Nowa gra"** w reżyserce, bez restartu serwera.
 
 ## Smoke test
 
@@ -172,9 +173,9 @@ Ręczna checklista do przejścia przed każdym większym wydarzeniem:
 4. Nowa runda → buzzery aktywne; tap na buzzerze → „TY!" na tym buzzerze i
    dźwięk dzwonków na tablicy.
 5. Odkrycia (`1`–`6`), X-y (`Q`/`W`), przejęcie, przyznanie sumy do banku,
-   ⟲ COFNIJ ostatniej akcji — dźwięki i tablica spójne ze stanem panelu.
+   ⟲ COFNIJ ostatniej akcji — dźwięki i tablica spójne ze stanem reżyserki.
 6. Finał: timery (15 s / 20 s), „POWTÓRZONA!", wygrana przy sumie ≥ 200 →
    plansza „brawo", zakrycie i odkrycie tablicy przy wejściu gracza 2.
 7. Zabij serwer (Ctrl+C), `npm start` — gra wraca w tym samym miejscu,
-   klienci (tablica/panel/buzzery) sami się łączą ponownie.
+   klienci (tablica/reżyserka/buzzery) sami się łączą ponownie.
 8. „Nowa gra" → wszystko wyzerowane (banki, rundy, finał).

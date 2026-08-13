@@ -28,9 +28,12 @@ function render(msg) {
     STAGE_LABELS[r.stage] + (r.playingTeam !== null ? ` — ${state.teams[r.playingTeam].name}` : '');
 
   $('#round-info').textContent = inRound
-    ? `Runda ${state.roundIndex + 1}/${state.config.rounds.length} ×${r.multiplier}`
+    // "x" literą, nie znakiem × — font Familiada nie ma glifu ×
+    ? `Runda ${state.roundIndex + 1}/${state.config.rounds.length} x${r.multiplier}`
     : '';
 
+  $('#question-card').hidden = state.phase === 'final';
+  document.body.classList.toggle('final', state.phase === 'final');
   $('#question-text').textContent = inRound ? r.question : '—';
   $('#host-sum').textContent = inRound ? r.sum : 0;
   $('#host-mult').textContent = inRound ? r.multiplier : 1;
@@ -46,6 +49,9 @@ function render(msg) {
     box.querySelector('.team-name').textContent = state.teams[t].name;
     box.querySelector('.bank-value').textContent = state.teams[t].bank;
     box.querySelector('.strikes-view').textContent = inRound ? 'X'.repeat(r.strikes[t]) : '';
+    box.classList.toggle('active', inRound &&
+      ((r.stage === 'play' && t === r.playingTeam) ||
+       (r.stage === 'steal' && t === 1 - r.playingTeam)));
     box.querySelector('.btn-play').disabled = !inRound || r.stage !== 'buzzers';
     box.querySelector('.btn-strike').disabled = !inRound ||
       (r.stage !== 'buzzers' && r.stage !== 'play') ||
@@ -53,10 +59,17 @@ function render(msg) {
     box.querySelector('.btn-award').disabled = !inRound || (r.stage !== 'play' && r.stage !== 'steal');
   }
 
-  $('#buzzer-status').textContent = !inRound ? '' :
-    r.stage !== 'buzzers' ? '' :
-    r.buzzed === null ? 'Buzzery uzbrojone — czekam…' :
-    `PIERWSZA: ${state.teams[r.buzzed].name}`;
+  const buzzerEl = $('#buzzer-status');
+  if (!inRound || r.stage !== 'buzzers') {
+    buzzerEl.textContent = '';
+    buzzerEl.className = '';
+  } else if (r.buzzed === null) {
+    buzzerEl.textContent = 'Buzzery uzbrojone — czekam…';
+    buzzerEl.className = 'armed';
+  } else {
+    buzzerEl.textContent = `PIERWSZA: ${state.teams[r.buzzed].name}`;
+    buzzerEl.className = `buzzed team-${r.buzzed}`;
+  }
   $('#btn-reset-buzzers').disabled = !inRound || r.stage !== 'buzzers';
   $('#btn-steal-fail').disabled = !inRound || r.stage !== 'steal';
   $('#btn-final').disabled = state.config.final.length !== 5;

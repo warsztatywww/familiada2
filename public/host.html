@@ -3,49 +3,62 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Familiada — panel prowadzącego</title>
+<title>Familiada — reżyserka</title>
 <link rel="stylesheet" href="/host.css">
 </head>
 <body>
 <header id="topbar">
-  <div id="stage-badge">—</div>
-  <div id="round-info"></div>
+  <div class="brand">
+    <strong>Familiada</strong>
+    <span>reżyserka</span>
+  </div>
+  <div id="led-status" class="led">
+    <span id="stage-badge">—</span>
+    <span id="round-info"></span>
+  </div>
   <div class="spacer"></div>
-  <button id="btn-intro">Intro</button>
-  <button id="btn-stop-music">Stop muzykę</button>
+  <div class="cluster">
+    <button id="btn-intro">▶ Intro</button>
+    <button id="btn-stop-music">■ Stop muzykę</button>
+  </div>
 </header>
 
 <main>
   <section class="card" id="question-card">
+    <span class="eyebrow">Pytanie</span>
     <h2 id="question-text">—</h2>
     <ol id="host-answers"></ol>
-    <div class="row">
-      <span>SUMA: <strong id="host-sum">0</strong> (×<span id="host-mult">1</span>)</span>
+    <div id="sum-row">
+      <span class="eyebrow">Suma rundy</span>
+      <span id="host-sum" class="led led-num">0</span>
+      <span class="mult">×<span id="host-mult">1</span></span>
     </div>
   </section>
 
   <section class="card" id="teams-card">
     <div class="team-box" data-team="0">
       <h3 class="team-name"></h3>
-      <div class="bank">Bank: <strong class="bank-value"></strong></div>
-      <div class="strikes-view"></div>
-      <div class="row">
-        <button class="btn-strike">+ X</button>
-        <button class="btn-play">GRA TA DRUŻYNA</button>
-        <button class="btn-award">SUMA DLA NICH</button>
+      <div class="bank">
+        <span class="eyebrow">Bank</span>
+        <strong class="bank-value led led-num"></strong>
       </div>
+      <div class="strikes-view"></div>
+      <button class="btn-play">GRA TA DRUŻYNA</button>
+      <button class="btn-strike">+ X</button>
+      <button class="btn-award">SUMA DLA NICH</button>
     </div>
     <div class="team-box" data-team="1">
       <h3 class="team-name"></h3>
-      <div class="bank">Bank: <strong class="bank-value"></strong></div>
-      <div class="strikes-view"></div>
-      <div class="row">
-        <button class="btn-strike">+ X</button>
-        <button class="btn-play">GRA TA DRUŻYNA</button>
-        <button class="btn-award">SUMA DLA NICH</button>
+      <div class="bank">
+        <span class="eyebrow">Bank</span>
+        <strong class="bank-value led led-num"></strong>
       </div>
+      <div class="strikes-view"></div>
+      <button class="btn-play">GRA TA DRUŻYNA</button>
+      <button class="btn-strike">+ X</button>
+      <button class="btn-award">SUMA DLA NICH</button>
     </div>
-    <div id="buzzer-status" class="row"></div>
+    <div id="buzzer-status"></div>
     <div class="row">
       <button id="btn-reset-buzzers">Uzbrój buzzery ponownie</button>
       <button id="btn-steal-fail">PRZEJĘCIE: PUDŁO</button>
@@ -53,6 +66,7 @@
   </section>
 
   <section class="card" id="final-card" hidden>
+    <span class="eyebrow">Finał</span>
     <div class="row">
       <button id="btn-timer-15">Start 15 s (gracz 1)</button>
       <button id="btn-timer-20">Start 20 s (gracz 2)</button>
@@ -68,11 +82,13 @@
     <details>
       <summary>Korekty (banki, nazwy drużyn)</summary>
       <div class="row" data-team="0">
-        <input class="name-input" maxlength="20"> <input class="bank-input" type="number" min="0">
+        <label>Nazwa <input class="name-input" maxlength="20"></label>
+        <label>Bank <input class="bank-input" type="number" min="0"></label>
         <button class="btn-apply">Zapisz</button>
       </div>
       <div class="row" data-team="1">
-        <input class="name-input" maxlength="20"> <input class="bank-input" type="number" min="0">
+        <label>Nazwa <input class="name-input" maxlength="20"></label>
+        <label>Bank <input class="bank-input" type="number" min="0"></label>
         <button class="btn-apply">Zapisz</button>
       </div>
     </details>
@@ -80,15 +96,21 @@
 </main>
 
 <footer id="bottombar">
-  <button id="btn-undo">⟲ COFNIJ</button>
-  <button id="btn-redo">⟳ PONÓW</button>
-  <button id="btn-prev-round">◀ Poprzednia</button>
-  <button id="btn-new-round">Nowa runda</button>
-  <button id="btn-next-round">Następna ▶</button>
+  <div class="cluster">
+    <button id="btn-undo">⟲ COFNIJ</button>
+    <button id="btn-redo">⟳ PONÓW</button>
+  </div>
+  <div class="cluster">
+    <button id="btn-prev-round">◀ Poprzednia</button>
+    <button id="btn-new-round">Nowa runda</button>
+    <button id="btn-next-round">Następna ▶</button>
+  </div>
   <div class="spacer"></div>
-  <button id="btn-final">Finał</button>
-  <button id="btn-end-game">Koniec gry</button>
-  <button id="btn-new-game" class="danger">Nowa gra</button>
+  <div class="cluster">
+    <button id="btn-final">Finał</button>
+    <button id="btn-end-game">Koniec gry</button>
+    <button id="btn-new-game" class="danger">Nowa gra</button>
+  </div>
 </footer>
 <script type="module" src="/host.js"></script>
 </body>
