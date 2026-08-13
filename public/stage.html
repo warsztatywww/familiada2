@@ -78,7 +78,9 @@
 </main>
 <div id="huddle" hidden></div>
 <div id="status"></div>
+<script src="/common/NoSleep.min.js"></script>
 <script type="module">
+  import '/common/screen.js'; // pełny ekran + blokada wygaszania
   import { connectGame } from '/common/ws.js';
   const questionEl = document.getElementById('question');
   const roundMetaEl = document.getElementById('round-meta');
@@ -137,10 +139,6 @@
     }
   });
 
-  // ekran nie może zgasnąć w trakcie gry
-  function keepAwake() { navigator.wakeLock?.request('screen').catch(() => {}); }
-  keepAwake();
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
 </script>
 </body>
 </html>

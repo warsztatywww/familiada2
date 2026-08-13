@@ -82,7 +82,9 @@
 </div>
 <div id="button"><div id="label">CZEKAJ</div></div>
 <div id="team"></div>
+<script src="/common/NoSleep.min.js"></script>
 <script type="module">
+  import '/common/screen.js'; // pełny ekran + blokada wygaszania
   import { connectGame } from '/common/ws.js';
   const team = Number(location.pathname.split('/').pop()) - 1; // /buzzer/1 -> 0
   document.body.classList.add(`team-${team}`);
@@ -110,10 +112,6 @@
     }
   });
 
-  // ekran nie może zgasnąć w trakcie gry
-  function keepAwake() { navigator.wakeLock?.request('screen').catch(() => {}); }
-  keepAwake();
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
 </script>
 </body>
 </html>
