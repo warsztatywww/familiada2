@@ -59,9 +59,16 @@
   <button id="btn-start">⛶ Pełny ekran</button>
   <p>Kliknij, aby rozpocząć i włączyć dźwięk</p>
 </div>
-<audio id="snd-correct" src="/assets/sounds/correct.mp3" preload="auto"></audio>
-<audio id="snd-error" src="/assets/sounds/error.mp3" preload="auto"></audio>
-<audio id="snd-brawo" src="/assets/sounds/brawo.wav" preload="auto"></audio>
+<!-- SFX: krótkie efekty, mogą się nakładać na siebie i na jingiel -->
+<audio id="snd-good" src="/assets/sounds/dobra-odpowiedz-familiada.mp3" preload="auto"></audio>
+<audio id="snd-bad" src="/assets/sounds/bledna-familiada.mp3" preload="auto"></audio>
+<audio id="snd-buzz" src="/assets/sounds/dzwonki-familiada.mp3" preload="auto"></audio>
+<audio id="snd-final-repeat" src="/assets/sounds/powtorzenie-w-finale-familiada.mp3" preload="auto"></audio>
+<audio id="snd-final-time" src="/assets/sounds/czas-final-familiada.mp3" preload="auto"></audio>
+<!-- Jingle: długie stingi, tylko jeden gra na raz -->
+<audio id="jingle-break" src="/assets/sounds/przerywnik-przed-i-po-familiada.mp3" preload="auto"></audio>
+<audio id="jingle-prefinal" src="/assets/sounds/przed-finalem-familiada.mp3" preload="auto"></audio>
+<audio id="jingle-after1" src="/assets/sounds/po-1-rundzie-finalu-familiada.mp3" preload="auto"></audio>
 <audio id="snd-intro" src="/assets/audio/intro.webm" preload="auto"></audio>
 <script type="module" src="/board.js"></script>
 </body>

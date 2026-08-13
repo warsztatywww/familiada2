@@ -11,21 +11,21 @@ function show(viewId) {
 // --- dźwięki i wielki X ---
 
 const audioCtx = new AudioContext();
-function beep(freq, ms, gainVal = 0.3) {
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.frequency.value = freq;
-  osc.type = 'square';
-  gain.gain.value = gainVal;
-  osc.connect(gain).connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + ms / 1000);
-}
 
-function play(id) {
+// Kanał SFX: krótkie efekty, mogą się nakładać (każdy własny <audio>).
+function playSfx(id) {
   const el = $(id);
   el.currentTime = 0;
   el.play().catch(() => {}); // audio odblokowane bramką startową; catch na wszelki wypadek
+}
+
+// Kanał jingla: długie stingi — nowy zatrzymuje poprzedni, żeby dwa się nie zderzyły.
+const JINGLES = ['jingle-break', 'jingle-prefinal', 'jingle-after1'];
+function playJingle(id) {
+  for (const j of JINGLES) { const el = $(j); el.pause(); el.currentTime = 0; }
+  const el = $(id);
+  el.currentTime = 0;
+  el.play().catch(() => {});
 }
 
 let xTimeout = null;
@@ -40,33 +40,36 @@ function handleEvent(event) {
     case 'reveal':
     case 'round-won':
     case 'steal-success':
-    case 'sum-awarded':
     case 'final-reveal':
-      play('snd-correct');
+    case 'cheap-reveal':
+      playSfx('snd-good');
       break;
     case 'strike':
     case 'strike-out':
     case 'steal-fail':
-      play('snd-error');
+      playSfx('snd-bad');
       flashBigX();
       break;
-    case 'repeat':
     case 'final-miss':
-      play('snd-error');
-      break;
-    case 'final-win':
-    case 'game-over':
-      play('snd-brawo');
+      playSfx('snd-bad'); // zła odpowiedź w finale — bez ikony X
       break;
     case 'buzz':
-      beep(880, 150);
+      playSfx('snd-buzz');
       break;
-    case 'cheap-reveal':
-      beep(440, 80, 0.12);
+    case 'repeat':
+      playSfx('snd-final-repeat');
+      break;
+    case 'new-round':
+      playJingle('jingle-break');
+      break;
+    case 'final-start':
+      playJingle('jingle-prefinal');
+      break;
+    case 'timer-start':
+      if (event.player === 2) playJingle('jingle-after1');
       break;
     case 'intro': {
-      // Ponowne kliknięcie "Intro" w trakcie odtwarzania = replay od początku
-      // (renderIntro tego nie zrobi — stan 'video' się nie zmienia).
+      // Ponowne kliknięcie "Intro" w trakcie odtwarzania = replay od początku.
       if (lastState?.phase !== 'idle') break;
       const video = $('intro-video');
       const music = $('snd-intro');
@@ -203,7 +206,7 @@ function startTimerLoop(timer, serverNow) {
     $('final-timer').textContent = remaining;
     if (remaining === 0 && !timerDone) {
       timerDone = true;
-      beep(220, 700);
+      playSfx('snd-final-time');
     }
     if (remaining > 0) timerRAF = requestAnimationFrame(tick);
   };
