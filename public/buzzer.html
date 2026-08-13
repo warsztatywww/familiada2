@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Familiada — buzzer</title>
+<style>
+  * { margin: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    display: grid; place-items: center;
+    font-family: system-ui, sans-serif; font-weight: 900;
+    color: #fff; text-align: center;
+    user-select: none; -webkit-user-select: none; touch-action: manipulation;
+    transition: background 0.15s;
+  }
+  body[data-state="czekaj"] { background: #23272f; color: #8a93a5; }
+  body[data-state="gotowy"].team-0 { background: #3d8bfd; }
+  body[data-state="gotowy"].team-1 { background: #ff4d4d; }
+  body[data-state="wygrany"] { background: #1faa4a; }
+  body[data-state="przegrany"] { background: #17191d; color: #555; }
+  body.disconnected::before {
+    content: 'ŁĄCZĘ…'; position: fixed; top: 12px; left: 0; right: 0; font-size: 16px; color: #ffb300;
+  }
+  #label { font-size: 14vw; line-height: 1.1; padding: 5vw; }
+  #team { position: fixed; bottom: 16px; left: 0; right: 0; font-size: 16px; font-weight: 400; opacity: 0.8; }
+</style>
+</head>
+<body data-state="czekaj">
+<div id="label">CZEKAJ</div>
+<div id="team"></div>
+<script type="module">
+  import { connectGame } from '/common/ws.js';
+  const team = Number(location.pathname.split('/').pop()) - 1; // /buzzer/1 -> 0
+  document.body.classList.add(`team-${team}`);
+
+  let state = null;
+  const game = connectGame((msg) => {
+    state = msg.state;
+    const r = state.round;
+    let mode = 'czekaj';
+    let label = 'CZEKAJ';
+    if (state.phase === 'round' && r.stage === 'buzzers') {
+      if (r.buzzed === null) { mode = 'gotowy'; label = 'NACIŚNIJ!'; }
+      else if (r.buzzed === team) { mode = 'wygrany'; label = 'TY!'; }
+      else { mode = 'przegrany'; label = 'SPÓŹNIONY'; }
+    }
+    document.body.dataset.state = mode;
+    document.getElementById('label').textContent = label;
+    document.getElementById('team').textContent = `Buzzer: ${state.teams[team].name}`;
+  });
+
+  document.body.addEventListener('pointerdown', () => {
+    if (document.body.dataset.state === 'gotowy') {
+      game.send({ type: 'buzz', team });
+      if (navigator.vibrate) navigator.vibrate(80);
+    }
+  });
+
+  // ekran nie może zgasnąć w trakcie gry
+  try { navigator.wakeLock?.request('screen'); } catch {}
+</script>
+</body>
+</html>
