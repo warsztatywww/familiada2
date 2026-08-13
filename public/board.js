@@ -126,12 +126,20 @@ function renderIntro(state) {
     video.currentTime = 0;
   } else if (state.intro === 'off') {
     music.pause();
+  } else if (state.intro === 'music') {
+    // Po odświeżeniu tablicy w trakcie 'music' snapshot startowy ląduje tu
+    // bezpośrednio (bez przejścia przez 'video') — trzeba dograć muzykę.
+    // Nie resetujemy currentTime: wznowienie w środku utworu jest ok, a po
+    // odświeżeniu i tak zaczyna się od 0.
+    if (music.paused) music.play().catch(() => {});
   }
-  // intro === 'music': widok przełącza render() (pusta plansza), muzyka gra dalej
+  // widok dla 'music' przełącza render() (pusta plansza)
 }
 
+let lastState = null; // najnowszy state — potrzebny w handlerze kliknięcia (odblokowanie audio)
 function render(msg) {
   const { state } = msg;
+  lastState = state;
   if (state.phase === 'round') {
     show('view-round');
     renderRound(state);
@@ -171,5 +179,10 @@ if (audioHint) {
   document.addEventListener('click', () => {
     audioCtx.resume();
     audioHint.hidden = true;
+    // Świeży snapshot po odświeżeniu strony w trakcie intro === 'music'
+    // trafia do renderIntro() zanim padnie pierwszy gest użytkownika —
+    // przeglądarka blokuje wtedy music.play(); doganiamy to tutaj.
+    const music = $('snd-intro');
+    if (lastState?.intro === 'music' && music.paused) music.play().catch(() => {});
   }, { once: true });
 }
