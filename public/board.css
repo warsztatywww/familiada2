@@ -71,9 +71,9 @@ body.disconnected::after {
 #intro-logo-wrap {
   --logo-delay: 0.5s;
   position: absolute;
-  left: 50.9%; top: 50.8%;
+  left: 57.5%; top: 58.5%;
   transform: translate(-50%, -50%) rotate(-1.3deg);
-  width: 55vw;
+  width: 44vw;
   pointer-events: none;
 }
 #intro-logo { display: block; width: 100%; opacity: 0; }
