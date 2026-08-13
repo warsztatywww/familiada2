@@ -159,7 +159,7 @@ Ręczna checklista do przejścia przed każdym większym wydarzeniem:
    karty/urządzenia).
 3. Intro → wideo, po nim plansza + muzyka w tle; „Stop muzykę" ucina.
 4. Nowa runda → buzzery aktywne; tap na buzzerze → „TY!" na tym buzzerze i
-   beep na tablicy.
+   dźwięk dzwonków na tablicy.
 5. Odkrycia (`1`–`6`), X-y (`Q`/`W`), przejęcie, przyznanie sumy do banku
    — dźwięki i tablica spójne ze stanem panelu.
 6. Finał: timery (15 s / 20 s), „POWTÓRZONA!", wygrana przy sumie ≥ 200 →

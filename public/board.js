@@ -10,8 +10,6 @@ function show(viewId) {
 
 // --- dźwięki i wielki X ---
 
-const audioCtx = new AudioContext();
-
 // Kanał SFX: krótkie efekty, mogą się nakładać (każdy własny <audio>).
 function playSfx(id) {
   const el = $(id);
@@ -285,7 +283,6 @@ $('intro-video').addEventListener('ended', () => game.send({ type: 'introVideoEn
 // (przeglądarki blokują dźwięk do pierwszej interakcji użytkownika).
 
 $('btn-start').addEventListener('click', () => {
-  audioCtx.resume();
   document.documentElement.requestFullscreen().catch(() => {});
   $('start-gate').hidden = true;
   // Jeśli intro leci w tle, dograj/zsynchronizuj muzykę po odblokowaniu.
