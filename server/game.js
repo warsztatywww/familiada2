@@ -42,6 +42,7 @@ export function apply(state, cmd) {
         buzzed: null,
         playingTeam: null,
         strikes: [0, 0],
+        stealFailed: null,
         sum: 0,
         sumWinner: null,
       };
@@ -92,8 +93,11 @@ export function apply(state, cmd) {
     }
     case 'stealFail': {
       if (state.phase !== 'round' || round.stage !== 'steal') return null;
+      // Zapamiętane w stanie (nie tylko w evencie), żeby duży X przejęcia na
+      // tablicy przetrwał odświeżenie strony do końca rundy.
+      round.stealFailed = 1 - round.playingTeam;
       awardSumTo(state, round.playingTeam);
-      return { type: 'steal-fail', team: 1 - round.playingTeam };
+      return { type: 'steal-fail', team: round.stealFailed };
     }
     case 'awardSum': {
       if (state.phase !== 'round' || !isTeam(cmd.team)) return null;

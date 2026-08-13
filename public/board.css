@@ -73,14 +73,15 @@ body.disconnected::after {
    Wymiary pochodzą z --cw (szerokość modułu znakowego); nadpisanie --cw na
    .device--final przeskalowuje całość, bo pochodne liczone są na .device. */
 .device {
-  --cw: min(2.3vw, 4.2vh);
+  --cw: min(2.05vw, 4vh);
   --ch: calc(var(--cw) * 1.38);
   --gap: calc(var(--cw) * 0.11);
   display: grid;
   justify-items: center;
   gap: 2vh;
 }
-.device--final { --cw: min(1.9vw, 3.5vh); }
+/* Finał ma 32 kolumny vs 28+2×2 (krawędzie) rundy — ta sama wielkość modułu
+   daje niemal identyczną szerokość urządzenia w obu widokach. */
 
 .mini-row { display: flex; align-items: center; gap: 1.4vw; width: 100%; }
 .rail { flex: 1; height: 0.5vh; border-radius: 1vh; }
@@ -129,43 +130,37 @@ body.disconnected::after {
 }
 .cell.cheap { opacity: 0.55; }
 .cell.win { animation: won-flash 0.7s step-end infinite; }
+/* Zakryte punkty w finale: pełny świecący blok 5×7 (kurtyna). */
+.cell.block {
+  background:
+    radial-gradient(circle, var(--lit) 30%, transparent 38%) 0 0 / calc(100% / 5) calc(100% / 7),
+    var(--module-bg);
+  box-shadow: 0 0 0.7vh var(--lit-glow);
+}
 
-/* --- kolumna glifów: powtarzająca się sekwencja \/ X /\ przesuwa się w dół --- */
-.glyphs {
+/* --- kolumny błędów przy krawędziach matrycy: do trzech małych X-ów na
+   drużynę (lewa = 0, prawa = 1), a przy nieudanym przejęciu jeden duży X --- */
+.edge {
   display: grid;
   grid-template-columns: calc(var(--cw) * 2);
-  grid-auto-rows: var(--ch);
+  grid-template-rows: repeat(8, var(--ch));
   gap: var(--gap);
 }
-.gcell {
-  position: relative;
+.ecell {
   background:
     radial-gradient(circle, var(--unlit) 26%, transparent 34%) 0 0 / calc(100% / 10) calc(100% / 7),
     var(--module-bg);
   border-radius: 6%;
 }
-.gcell .g {
-  position: absolute; inset: 0;
-  display: grid; place-items: center;
-  font-size: calc(var(--ch) * 0.78);
+.edge .ex {
+  grid-column: 1;
+  place-self: center;
+  font-size: calc(var(--ch) * 0.82);
   line-height: 1;
   text-shadow: 0 0 0.7vh var(--lit-glow);
-  opacity: 0;
-  animation: gcycle 2.7s steps(1) infinite;
+  z-index: 1;
 }
-.gcell:nth-child(3n+1) { --goff: 0s; }
-.gcell:nth-child(3n+2) { --goff: -0.9s; }
-.gcell:nth-child(3n)   { --goff: -1.8s; }
-.gcell .g:nth-child(1) { animation-delay: var(--goff); }
-.gcell .g:nth-child(2) { animation-delay: calc(var(--goff) + 0.9s); }
-.gcell .g:nth-child(3) { animation-delay: calc(var(--goff) + 1.8s); }
-@keyframes gcycle { 0% { opacity: 1; } 33.4% { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) {
-  .gcell .g { animation: none; }
-  .gcell:nth-child(3n+1) .g:nth-child(1) { opacity: 1; }
-  .gcell:nth-child(3n+2) .g:nth-child(2) { opacity: 1; }
-  .gcell:nth-child(3n)   .g:nth-child(3) { opacity: 1; }
-}
+.edge .ex-big { font-size: calc(var(--ch) * 1.9); }
 
 /* --- boki: banki, nazwy drużyn, X-y, buzzer (czerwona = lewa, niebieska = prawa) --- */
 .side { display: grid; justify-items: center; gap: 1.8vh; align-content: center; }
@@ -183,10 +178,6 @@ body.disconnected::after {
 }
 #side-1 .bank { border-color: var(--frame-blue); }
 .team { font-size: 2.4vh; opacity: 0.85; text-align: center; max-width: 15vw; overflow-wrap: break-word; }
-.strikes {
-  font-size: 5vh; min-height: 5vh; letter-spacing: 0.2em;
-  text-shadow: 0 0 1vh var(--lit-glow);
-}
 .buzzed-marker {
   width: 2.4vh; height: 2.4vh; border-radius: 50%;
   background: var(--lit); box-shadow: 0 0 2vh var(--lit-glow);

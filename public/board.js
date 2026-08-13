@@ -87,17 +87,21 @@ function handleEvent(event) {
 
 const COLS = 28;       // matryca rundy: nr(1)+odstęp(1)+tekst(22)+odstęp(1)+pkt(3)
 const TEXT_W = COLS - 6;
-const COLS_FINAL = 34; // finał: 2 × [tekst(12)+odstęp(1)+pkt(3)] + przerwa(2)
+const COLS_FINAL = 32; // finał: 2 × [tekst(12)+odstęp(1)+pkt(2)] + przerwa(2), punkty przy środku
 const ROWS = 8;        // 6 odpowiedzi + pusty wiersz + SUMA
 
 const esc = (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] ?? c);
 const chars = (s) => [...s]; // spread zamiast split — polskie znaki spoza BMP też są 1 komórką
 
 // Linia: string albo { text, cls } (klasa trafia na każdą komórkę wiersza).
+// Znak █ to zakryte punkty finału — komórka-blok w pełni zaświecona (CSS).
 function rowHtml(line, cols) {
   const { text, cls } = typeof line === 'string' ? { text: line, cls: '' } : line;
   return chars(text.padEnd(cols)).slice(0, cols)
-    .map((c) => `<span class="cell${cls ? ` ${cls}` : ''}">${c === ' ' ? '' : esc(c)}</span>`)
+    .map((c) => {
+      if (c === '█') return `<span class="cell block${cls ? ` ${cls}` : ''}"></span>`;
+      return `<span class="cell${cls ? ` ${cls}` : ''}">${c === ' ' ? '' : esc(c)}</span>`;
+    })
     .join('');
 }
 
@@ -116,12 +120,19 @@ const alignRight = (s, cols) => s.padStart(cols);
 const center = (s, cols) => s.padStart(Math.floor((cols + chars(s).length) / 2));
 const sumLine = (sum, cols) => alignRight(`SUMA ${String(sum).padStart(3)}`, cols);
 
-// Kolumna glifów przy lewej krawędzi matrycy — przesuwająca się sekwencja
-// ozdobnych znaków, jak na oryginalnej tablicy. Budowana raz; animuje CSS.
-const GLYPH_FRAMES = ['\\/', 'X', '/\\'];
-$('glyphs').innerHTML = Array.from({ length: ROWS }, () =>
-  `<div class="gcell">${GLYPH_FRAMES.map((g) => `<span class="g">${g}</span>`).join('')}</div>`
-).join('');
+// Kolumny błędów przy krawędziach matrycy: do trzech małych X-ów (wiersze
+// 3–5), a po nieudanym przejęciu jeden duży X zamiast nich.
+function renderEdges(strikes, stealFailed) {
+  for (const t of [0, 1]) {
+    const modules = Array.from({ length: ROWS }, (_, r) =>
+      `<span class="ecell" style="grid-row:${r + 1}"></span>`).join('');
+    const xs = stealFailed === t
+      ? `<span class="ex ex-big" style="grid-row:4/span 2">X</span>`
+      : Array.from({ length: strikes[t] }, (_, i) =>
+          `<span class="ex" style="grid-row:${i + 3}">X</span>`).join('');
+    $(`edge-${t}`).innerHTML = modules + xs;
+  }
+}
 
 // --- plansza rundy ---
 
@@ -145,10 +156,10 @@ function renderBoard(answers, sum, multiplier) {
 function renderRound(state) {
   const r = state.round;
   renderBoard(r.answers, r.sum, r.multiplier);
+  renderEdges(r.strikes, r.stealFailed ?? null);
   for (const t of [0, 1]) {
     $(`bank-${t}`).textContent = state.teams[t].bank;
     $(`team-${t}`).textContent = state.teams[t].name;
-    $(`strikes-${t}`).textContent = 'X'.repeat(r.strikes[t]);
     $(`side-${t}`).classList.toggle('buzzed', r.buzzed === t);
   }
 }
@@ -157,10 +168,10 @@ function renderRound(state) {
 // (lub zostało wyciszone), a przed rundą nie ma jeszcze danych rundy.
 function renderEmptyBoard(state) {
   renderBoard(Array(6).fill(null), 0, 1);
+  renderEdges([0, 0], null);
   for (const t of [0, 1]) {
     $(`bank-${t}`).textContent = state.teams[t].bank;
     $(`team-${t}`).textContent = state.teams[t].name;
-    $(`strikes-${t}`).textContent = '';
     $(`side-${t}`).classList.remove('buzzed');
   }
 }
@@ -209,19 +220,27 @@ function renderIntro(state) {
 
 const FINAL_TEXT_W = 12;
 
-// Połówka wiersza finału: tekst(12) + odstęp + punkty(3).
-function finalCell(f, player, qIndex) {
+// Połówka wiersza finału: odpowiedzi na zewnątrz, punkty przy środku (jak na
+// oryginalnej tablicy). Nieodkryte pole = kreski na całej szerokości i blok
+// (kurtyna) zamiast punktów; brak odpowiedzi = krótkie kreski + 0.
+function finalHalf(f, player, qIndex) {
   const entry = f.entries[player][qIndex];
-  if (f.covered || entry === null) return `${'.'.repeat(FINAL_TEXT_W)}  --`;
-  if (entry.answerIndex === null) return `${'-'.repeat(FINAL_TEXT_W)}   0`;
+  if (f.covered || entry === null) return { text: '-'.repeat(FINAL_TEXT_W), pts: '██' };
+  if (entry.answerIndex === null) return { text: '----', pts: ' 0' };
   const a = f.questions[qIndex].answers[entry.answerIndex];
-  return `${fit(a.text, FINAL_TEXT_W)} ${String(a.points).padStart(3)}`;
+  return { text: fit(a.text, FINAL_TEXT_W).trimEnd(), pts: String(a.points).padStart(2) };
+}
+
+function finalRow(f, qIndex) {
+  const l = finalHalf(f, 0, qIndex);
+  const r = finalHalf(f, 1, qIndex);
+  return `${l.text.padStart(FINAL_TEXT_W)} ${l.pts}  ${r.pts} ${r.text.padEnd(FINAL_TEXT_W)}`;
 }
 
 function renderFinal(msg) {
   const f = msg.state.final;
-  const lines = ['', ...f.questions.map((q, i) => `${finalCell(f, 0, i)}  ${finalCell(f, 1, i)}`)];
-  lines.push('', sumLine(f.sum, COLS_FINAL));
+  const lines = ['', ...f.questions.map((q, i) => finalRow(f, i))];
+  lines.push('', center(`SUMA ${String(f.sum).padStart(3)}`, COLS_FINAL));
   setCells($('final-grid'), lines, COLS_FINAL);
   document.getElementById('view-final').classList.toggle('won', f.won);
 
