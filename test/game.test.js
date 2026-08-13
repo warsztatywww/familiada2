@@ -391,3 +391,25 @@ test('timerStart: odrzuca seconds nie-integer', () => {
   assert.equal(result, null);
   assert.equal(state.final.timer, null);
 });
+
+test('timerStart echuje player 1 i 2', () => {
+  const s = freshFinal();
+  const ev1 = apply(s, { type: 'timerStart', seconds: 15, player: 1, now: 1000 });
+  assert.equal(ev1.player, 1);
+  const ev2 = apply(s, { type: 'timerStart', seconds: 20, player: 2, now: 2000 });
+  assert.equal(ev2.player, 2);
+});
+
+test('timerStart bez player: pole undefined, timer ustawiony', () => {
+  const s = freshFinal();
+  const ev = apply(s, { type: 'timerStart', seconds: 15, now: 1000 });
+  assert.equal(ev.player, undefined);
+  assert.deepEqual(s.final.timer, { duration: 15, startedAt: 1000 });
+});
+
+test('timerStart z nieprawidłowym player: pominięty, timer ustawiony', () => {
+  const s = freshFinal();
+  const ev = apply(s, { type: 'timerStart', seconds: 15, player: 5, now: 1000 });
+  assert.equal(ev.player, undefined);
+  assert.deepEqual(s.final.timer, { duration: 15, startedAt: 1000 });
+});

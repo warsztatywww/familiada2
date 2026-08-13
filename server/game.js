@@ -187,7 +187,8 @@ export function apply(state, cmd) {
     case 'timerStart': {
       if (state.phase !== 'final' || !Number.isInteger(cmd.seconds) || cmd.seconds <= 0) return null;
       state.final.timer = { duration: cmd.seconds, startedAt: cmd.now };
-      return { type: 'timer-start' };
+      const player = cmd.player === 1 || cmd.player === 2 ? cmd.player : undefined;
+      return { type: 'timer-start', player };
     }
     case 'timerStop': {
       if (state.phase !== 'final' || !state.final.timer) return null;

@@ -153,8 +153,8 @@ $('#final-questions').addEventListener('click', (e) => {
   const answerIndex = btn.dataset.a === 'null' ? null : Number(btn.dataset.a);
   send({ type: 'finalSet', qIndex, player, answerIndex });
 });
-$('#btn-timer-15').onclick = () => send({ type: 'timerStart', seconds: 15 });
-$('#btn-timer-20').onclick = () => send({ type: 'timerStart', seconds: 20 });
+$('#btn-timer-15').onclick = () => send({ type: 'timerStart', seconds: 15, player: 1 });
+$('#btn-timer-20').onclick = () => send({ type: 'timerStart', seconds: 20, player: 2 });
 $('#btn-timer-stop').onclick = () => send({ type: 'timerStop' });
 $('#btn-repeat').onclick = () => send({ type: 'repeatBuzzer' });
 for (const row of document.querySelectorAll('#fix-card .row')) {
