@@ -9,11 +9,17 @@
   * { box-sizing: border-box; margin: 0; }
   body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; display: grid; place-content: center; gap: 24px; padding: 24px; }
   h1 { text-align: center; letter-spacing: 0.3em; color: var(--accent); font-weight: 800; }
-  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; max-width: 1100px; }
-  a.tile { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; color: var(--text); text-decoration: none; display: grid; gap: 12px; }
+  /* max-width mieści 3 kafle w rzędzie — 5 widoków łamie się w 3 + 2 (buzzery razem na dole) */
+  .tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; max-width: 900px; }
+  a.tile { flex: 0 1 240px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; color: var(--text); text-decoration: none; display: grid; gap: 12px; align-content: start; }
   a.tile:hover { border-color: var(--accent); }
   .tile img { width: 160px; height: 160px; background: #fff; padding: 8px; border-radius: 8px; justify-self: center; }
   .tile .url { color: var(--muted); font-size: 13px; word-break: break-all; }
+  /* Węziej niż 3 kafle w rzędzie: jedna kolumna zamiast łamania po 2, które rozdzielałoby buzzery */
+  @media (max-width: 899px) {
+    .tiles { flex-direction: column; align-items: center; }
+    a.tile { flex-basis: auto; width: min(280px, 100%); }
+  }
 </style>
 </head>
 <body>
