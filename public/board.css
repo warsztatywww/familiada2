@@ -29,6 +29,11 @@ body.disconnected::after {
   content: '⟳';
   position: fixed; top: 12px; right: 16px; font-size: 3vh; opacity: 0.5;
 }
+#audio-hint {
+  position: fixed; bottom: 1.5vh; left: 50%; transform: translateX(-50%);
+  font-size: 2vh; letter-spacing: 0.05em; opacity: 0.45;
+  text-transform: none; z-index: 10;
+}
 
 #board, #board > section { height: 100vh; }
 
