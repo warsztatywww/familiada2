@@ -86,9 +86,9 @@ export async function startServer({ port, stateFile, questionsFile }) {
       if (msg?.type !== 'command' || typeof msg.cmd?.type !== 'string') return;
       const cmd = msg.cmd;
       if (cmd.type === 'undo' || cmd.type === 'redo') {
-        const restored = cmd.type === 'undo' ? history.undo(state) : history.redo(state);
-        if (!restored) return;
-        state = restored;
+        const snap = cmd.type === 'undo' ? history.undo(state) : history.redo(state);
+        if (!snap) return;
+        state = snap;
         state.config = config; // pytania zawsze świeże, jak przy wczytaniu z pliku
         broadcast(null);
         return;
@@ -104,8 +104,13 @@ export async function startServer({ port, stateFile, questionsFile }) {
       }
       const stateChanged = event !== null || wasSilentChange(cmd);
       if (!stateChanged) return;
+      // Wpis trafia na stos undo tylko przy realnej zmianie stanu — event/SILENT
+      // to tylko sygnał "trzeba rozgłosić", nie dowód zmiany (np. repeatBuzzer
+      // zwraca event bez ruszania stanu, drugi "stop timera" jest idempotentny).
+      // Stan jest mały, więc porównanie przez JSON.stringify jest tanie.
       // introVideoEnded to automat z tablicy — nie zaśmieca wierzchu stosu undo
-      if (cmd.type !== 'introVideoEnded') history.push(describeCommand(cmd, before), before);
+      const realChange = JSON.stringify(state) !== JSON.stringify(before);
+      if (cmd.type !== 'introVideoEnded' && realChange) history.push(describeCommand(cmd, before), before);
       broadcast(event);
     });
   });

@@ -124,6 +124,29 @@ test('serwer: undo/redo przywraca stan i rozsyła etykiety', async () => {
   rmSync(stateFile, { force: true });
 });
 
+test('serwer: repeatBuzzer w finale rozgłasza event, ale nie zaśmieca stosu undo', async () => {
+  const stateFile = 'test-state-repeat.json';
+  rmSync(stateFile, { force: true });
+  const srv = await startServer({ port: 0, stateFile, questionsFile: 'questions.json' });
+  const ws = new WebSocket(`ws://127.0.0.1:${srv.port}`);
+  const send = (cmd) => ws.send(JSON.stringify({ type: 'command', cmd }));
+  await nextMessage(ws); // snapshot startowy
+
+  send({ type: 'startFinal' });
+  const afterFinal = await nextMessage(ws);
+  assert.equal(afterFinal.state.phase, 'final');
+  assert.equal(afterFinal.undoLabel, 'start finału');
+
+  send({ type: 'repeatBuzzer' });
+  const afterRepeat = await nextMessage(ws);
+  assert.equal(afterRepeat.event.type, 'repeat'); // broadcast doszedł
+  assert.equal(afterRepeat.undoLabel, 'start finału'); // ale stan się nie zmienił — brak nowego wpisu
+
+  ws.close();
+  await srv.close();
+  rmSync(stateFile, { force: true });
+});
+
 test('serwer: /qr.svg z niepoprawnymi (za długimi) danymi zwraca 400 i nie ubija serwera', async () => {
   const stateFile = 'test-state-qr.json';
   rmSync(stateFile, { force: true });

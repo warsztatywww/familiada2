@@ -197,7 +197,11 @@ let lastTimerStart = null; // startedAt ostatnio uruchomionego timera — nie re
 function startTimerLoop(timer, serverNow) {
   const offset = Date.now() - serverNow; // korekta zegara klienta
   cancelAnimationFrame(timerRAF);
-  timerDone = false;
+  const elapsedAtStart = (Date.now() - offset - timer.startedAt) / 1000;
+  const remainingAtStart = Math.max(0, Math.ceil(timer.duration - elapsedAtStart));
+  // Timer przywrócony przez undo/redo już wygasły — pokaż 0 bez dźwięku,
+  // gong ma grać tylko przy naturalnym dojściu do zera na żywo.
+  timerDone = remainingAtStart === 0;
   const tick = () => {
     const elapsed = (Date.now() - offset - timer.startedAt) / 1000;
     const remaining = Math.max(0, Math.ceil(timer.duration - elapsed));
