@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>Familiada — tablica</title>
+<link rel="stylesheet" href="/board.css">
+</head>
+<body>
+<main id="board">
+  <!-- widok idle/intro -->
+  <section id="view-intro">
+    <video id="intro-video" src="/assets/video/czolowka.mp4" preload="auto" muted playsinline></video>
+  </section>
+
+  <!-- widok rundy -->
+  <section id="view-round" hidden>
+    <div class="side" id="side-0">
+      <div class="bank" id="bank-0">0</div>
+      <div class="team" id="team-0"></div>
+      <div class="strikes" id="strikes-0"></div>
+      <div class="buzzed-marker" id="buzzed-0">●</div>
+    </div>
+    <div class="panel">
+      <ol id="answers"></ol>
+      <div class="sum-row"><span>SUMA</span><span id="sum">0</span></div>
+    </div>
+    <div class="side" id="side-1">
+      <div class="bank" id="bank-1">0</div>
+      <div class="team" id="team-1"></div>
+      <div class="strikes" id="strikes-1"></div>
+      <div class="buzzed-marker" id="buzzed-1">●</div>
+    </div>
+  </section>
+
+  <!-- widok finału (Task 10) -->
+  <section id="view-final" hidden></section>
+
+  <!-- widok końca gry (Task 10) -->
+  <section id="view-gameover" hidden></section>
+
+  <!-- overlay wielkiego X -->
+  <div id="big-x" hidden>X</div>
+</main>
+<audio id="snd-correct" src="/assets/sounds/correct.mp3" preload="auto"></audio>
+<audio id="snd-error" src="/assets/sounds/error.mp3" preload="auto"></audio>
+<audio id="snd-brawo" src="/assets/sounds/brawo.wav" preload="auto"></audio>
+<audio id="snd-intro" src="/assets/audio/intro.webm" preload="auto"></audio>
+<script type="module" src="/board.js"></script>
+</body>
+</html>

@@ -25,7 +25,7 @@ export async function startServer({ port, stateFile, questionsFile }) {
 
   let seq = 0;
   const app = express();
-  app.use(express.static(PUBLIC_DIR));
+  app.use(express.static(PUBLIC_DIR, { extensions: ['html'] }));
   app.get('/buzzer/:team(1|2)', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'buzzer.html')));
   app.get('/qr.svg', async (req, res) => {
     const data = String(req.query.data ?? '');

@@ -1,0 +1,88 @@
+@font-face { font-family: 'Familiada'; src: url('/assets/fonts/familiada.ttf'); }
+
+:root {
+  --bg: #000;
+  --board-bg: #07120a;
+  --lit: #ffd94a;
+  --lit-glow: rgba(255, 217, 74, 0.35);
+  --unlit: #142016;
+  --x-red: #ff3b30;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+/* Reguły poniżej (np. #view-intro, #view-round, #big-x) ustawiają display
+   bezwarunkowo, co samo w sobie przebiłoby domyślne [hidden] { display: none }
+   z arkusza UA (reguły autora zawsze wygrywają z UA, niezależnie od
+   specyficzności) — bez tego board.js nie mógłby chować sekcji atrybutem
+   hidden. */
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--lit);
+  font-family: 'Familiada', monospace;
+  overflow: hidden;
+  cursor: none;
+  text-transform: uppercase;
+}
+body.disconnected::after {
+  content: '⟳';
+  position: fixed; top: 12px; right: 16px; font-size: 3vh; opacity: 0.5;
+}
+
+#board, #board > section { height: 100vh; }
+
+/* --- intro --- */
+#view-intro { display: grid; place-items: center; background: #000; }
+#intro-video { width: 100vw; height: 100vh; object-fit: contain; }
+
+/* --- runda: plansza LED --- */
+#view-round {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 3fr) 1fr;
+  align-items: center;
+  gap: 2vw;
+  padding: 4vh 2vw;
+  background:
+    radial-gradient(circle, var(--unlit) 1.2px, transparent 1.4px) 0 0 / 6px 6px,
+    var(--board-bg);
+}
+
+.panel { display: grid; gap: 2.2vh; }
+#answers { list-style: none; display: grid; gap: 2.2vh; }
+#answers li {
+  display: grid;
+  grid-template-columns: 2ch 1fr 4ch;
+  gap: 1.5vw;
+  font-size: 5.2vh;
+  line-height: 1;
+  text-shadow: 0 0 12px var(--lit-glow);
+  white-space: nowrap;
+}
+#answers li .text { overflow: hidden; }
+#answers li .pts { text-align: right; }
+#answers li.hidden-answer .text, #answers li.hidden-answer .pts { opacity: 0.9; }
+#answers li.cheap { opacity: 0.65; }
+
+.sum-row {
+  display: flex; justify-content: flex-end; gap: 3vw;
+  font-size: 6.5vh; margin-top: 3vh;
+  text-shadow: 0 0 14px var(--lit-glow);
+}
+
+/* --- boki: banki, X-y, buzzer --- */
+.side { display: grid; justify-items: center; gap: 2vh; align-content: center; }
+.bank { font-size: 7vh; text-shadow: 0 0 14px var(--lit-glow); }
+.team { font-size: 2.6vh; opacity: 0.8; }
+.strikes { color: var(--x-red); font-size: 6vh; min-height: 6vh; letter-spacing: 0.2em; text-shadow: 0 0 14px rgba(255, 59, 48, 0.5); }
+.buzzed-marker { font-size: 4vh; visibility: hidden; }
+.side.buzzed .buzzed-marker { visibility: visible; animation: blink 0.8s step-end infinite; }
+@keyframes blink { 50% { opacity: 0.2; } }
+
+/* --- wielki X --- */
+#big-x {
+  position: fixed; inset: 0; display: grid; place-items: center;
+  font-size: 60vh; color: var(--x-red);
+  text-shadow: 0 0 40px rgba(255, 59, 48, 0.7);
+  background: rgba(0, 0, 0, 0.55);
+}
