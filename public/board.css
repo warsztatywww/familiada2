@@ -66,11 +66,13 @@ body.disconnected::after {
    3. osadzenie: sprężysty powrót do skali 1,
    4. pętla: oddychająca poświata + co kilka sekund refleks świetlny
       przelatujący po literach (maska z tego samego SVG). */
+/* Celowo nie idealnie na środku: lekki offset i przechył udają fizyczny
+   szyld zawieszony nad napisem FAMILIADA w studiu. */
 #intro-logo-wrap {
-  --logo-delay: 1.5s;
+  --logo-delay: 0.5s;
   position: absolute;
-  left: 50%; top: 52%;
-  transform: translate(-50%, -50%);
+  left: 50.9%; top: 50.8%;
+  transform: translate(-50%, -50%) rotate(-1.3deg);
   width: 55vw;
   pointer-events: none;
 }
