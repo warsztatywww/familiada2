@@ -26,13 +26,6 @@ function playJingle(id) {
   el.play().catch(() => {});
 }
 
-let xTimeout = null;
-function flashBigX() {
-  $('big-x').hidden = false;
-  clearTimeout(xTimeout);
-  xTimeout = setTimeout(() => { $('big-x').hidden = true; }, 1200);
-}
-
 function handleEvent(event) {
   switch (event.type) {
     case 'reveal':
@@ -45,11 +38,8 @@ function handleEvent(event) {
     case 'strike':
     case 'strike-out':
     case 'steal-fail':
-      playSfx('snd-bad');
-      flashBigX();
-      break;
     case 'final-miss':
-      playSfx('snd-bad'); // zła odpowiedź w finale — bez ikony X
+      playSfx('snd-bad'); // błąd pokazują X-y w kolumnach krawędziowych matrycy
       break;
     case 'buzz':
       playSfx('snd-buzz');
@@ -138,13 +128,13 @@ function renderEdges(strikes, stealFailed) {
 // --- plansza rundy ---
 
 // Rząd odpowiedzi: nieodkryta = numer + kropkowana linia; odkryta = tekst
-// + punkty; tania (cheap) = przygaszona; brak odpowiedzi (pytanie ma ich
-// mniej niż 6) = pusty wiersz.
+// + punkty (tania bez mnożnika); brak odpowiedzi (pytanie ma ich mniej niż 6)
+// = pusty wiersz.
 function answerLine(a, i, multiplier) {
   if (a === undefined) return '';
   if (!a || !a.revealed) return `${i + 1} ${'.'.repeat(COLS - 2)}`;
   const pts = String(a.points * (a.cheap ? 1 : multiplier)).padStart(3);
-  return { text: `${i + 1} ${fit(a.text, TEXT_W)} ${pts}`, cls: a.cheap ? 'cheap' : '' };
+  return `${i + 1} ${fit(a.text, TEXT_W)} ${pts}`;
 }
 
 function renderBoard(answers, sum, multiplier) {

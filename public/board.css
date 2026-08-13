@@ -12,7 +12,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-/* Reguły poniżej (np. #view-intro, #view-round, #big-x) ustawiają display
+/* Reguły poniżej (np. #view-intro, #view-round) ustawiają display
    bezwarunkowo, co samo w sobie przebiłoby domyślne [hidden] { display: none }
    z arkusza UA (reguły autora zawsze wygrywają z UA, niezależnie od
    specyficzności) — bez tego board.js nie mógłby chować sekcji atrybutem
@@ -128,7 +128,6 @@ body.disconnected::after {
   color: var(--lit);
   text-shadow: 0 0 0.7vh var(--lit-glow);
 }
-.cell.cheap { opacity: 0.55; }
 .cell.win { animation: won-flash 0.7s step-end infinite; }
 /* Zakryte punkty w finale: pełny świecący blok 5×7 (kurtyna). */
 .cell.block {
@@ -190,11 +189,3 @@ body.disconnected::after {
 
 #view-final.won .device { animation: won-flash 0.7s step-end infinite; }
 @keyframes won-flash { 50% { filter: brightness(1.6); } }
-
-/* --- wielki X: rysowany bursztynem jak na monochromatycznej matrycy --- */
-#big-x {
-  position: fixed; inset: 0; display: grid; place-items: center;
-  font-size: 60vh; color: var(--lit);
-  text-shadow: 0 0 6vh var(--lit-glow);
-  background: rgba(0, 0, 0, 0.65);
-}
