@@ -255,3 +255,110 @@ test('stealFail: zwraca null gdy stage !== steal', () => {
   assert.equal(result, null);
   assert.equal(state.round.stage, 'play'); // bez zmian
 });
+
+function freshFinal() {
+  const state = createGame(structuredClone(CONFIG));
+  apply(state, { type: 'startFinal' });
+  return state;
+}
+
+test('startFinal: wchodzi w finał', () => {
+  const state = freshFinal();
+  assert.equal(state.phase, 'final');
+  assert.equal(state.final.questions.length, 5);
+  assert.deepEqual(state.final.entries[0], [null, null, null, null, null]);
+});
+
+test('startFinal: odrzucany bez pytań finałowych', () => {
+  const noFinal = structuredClone(CONFIG);
+  noFinal.final = [];
+  const state = createGame(noFinal);
+  assert.equal(apply(state, { type: 'startFinal' }), null);
+  assert.equal(state.phase, 'idle');
+});
+
+test('finalSet: trafienie dodaje punkty, pudło nie', () => {
+  const state = freshFinal();
+  const ev = apply(state, { type: 'finalSet', qIndex: 0, player: 0, answerIndex: 0 });
+  assert.equal(ev.type, 'final-reveal');
+  assert.equal(state.final.sum, 90);
+  const miss = apply(state, { type: 'finalSet', qIndex: 1, player: 0, answerIndex: null });
+  assert.equal(miss.type, 'final-miss');
+  assert.equal(state.final.sum, 90);
+});
+
+test('finalSet: odrzuca duplikat odpowiedzi drugiego gracza', () => {
+  const state = freshFinal();
+  apply(state, { type: 'finalSet', qIndex: 0, player: 0, answerIndex: 0 });
+  assert.equal(apply(state, { type: 'finalSet', qIndex: 0, player: 1, answerIndex: 0 }), null);
+  const ev = apply(state, { type: 'finalSet', qIndex: 0, player: 1, answerIndex: 1 });
+  assert.equal(ev.type, 'final-reveal');
+});
+
+test('finalSet: odrzuca nadpisanie istniejącego wpisu', () => {
+  const state = freshFinal();
+  apply(state, { type: 'finalSet', qIndex: 0, player: 0, answerIndex: 0 });
+  assert.equal(apply(state, { type: 'finalSet', qIndex: 0, player: 0, answerIndex: 1 }), null);
+});
+
+test('finał: suma >= 200 daje final-win', () => {
+  const state = freshFinal();
+  apply(state, { type: 'finalSet', qIndex: 0, player: 0, answerIndex: 0 }); // 90
+  apply(state, { type: 'finalSet', qIndex: 1, player: 0, answerIndex: 0 }); // 80 -> 170
+  const ev = apply(state, { type: 'finalSet', qIndex: 2, player: 0, answerIndex: 0 }); // 70 -> 240
+  assert.equal(ev.type, 'final-win');
+  assert.equal(state.final.won, true);
+});
+
+test('finalClear: cofa wpis i przelicza sumę', () => {
+  const state = freshFinal();
+  apply(state, { type: 'finalSet', qIndex: 0, player: 0, answerIndex: 0 });
+  apply(state, { type: 'finalClear', qIndex: 0, player: 0 });
+  assert.equal(state.final.sum, 0);
+  assert.equal(state.final.entries[0][0], null);
+});
+
+test('timer: start i stop', () => {
+  const state = freshFinal();
+  const ev = apply(state, { type: 'timerStart', seconds: 15, now: 1000000 });
+  assert.equal(ev.type, 'timer-start');
+  assert.deepEqual(state.final.timer, { duration: 15, startedAt: 1000000 });
+  apply(state, { type: 'timerStop' });
+  assert.equal(state.final.timer, null);
+});
+
+test('repeatBuzzer: samo zdarzenie', () => {
+  const state = freshFinal();
+  assert.deepEqual(apply(state, { type: 'repeatBuzzer' }), { type: 'repeat' });
+});
+
+test('intro: video -> music -> off', () => {
+  const state = createGame(structuredClone(CONFIG));
+  assert.deepEqual(apply(state, { type: 'introStart' }), { type: 'intro' });
+  assert.equal(state.intro, 'video');
+  apply(state, { type: 'introVideoEnded' });
+  assert.equal(state.intro, 'music');
+  apply(state, { type: 'stopMusic' });
+  assert.equal(state.intro, 'off');
+});
+
+test('newRound zatrzymuje muzykę intro', () => {
+  const state = createGame(structuredClone(CONFIG));
+  apply(state, { type: 'introStart' });
+  apply(state, { type: 'introVideoEnded' });
+  apply(state, { type: 'newRound', roundIndex: 0 });
+  assert.equal(state.intro, 'off');
+});
+
+test('endGame i newGame', () => {
+  const state = freshRound(0);
+  apply(state, { type: 'setBank', team: 0, value: 300 });
+  const ev = apply(state, { type: 'endGame' });
+  assert.equal(ev.type, 'game-over');
+  assert.equal(state.phase, 'gameover');
+  const ev2 = apply(state, { type: 'newGame' });
+  assert.equal(ev2.type, 'new-game');
+  assert.equal(state.phase, 'idle');
+  assert.equal(state.teams[0].bank, 0);
+  assert.equal(state.round, null);
+});

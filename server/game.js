@@ -140,6 +140,84 @@ export function apply(state, cmd) {
       }
       return { type: 'strike', team: cmd.team };
     }
+    case 'startFinal': {
+      if (state.config.final.length !== 5) return null;
+      state.phase = 'final';
+      state.round = null;
+      state.final = {
+        questions: state.config.final,
+        entries: [Array(5).fill(null), Array(5).fill(null)],
+        sum: 0,
+        won: false,
+        timer: null,
+      };
+      return { type: 'final-start' };
+    }
+    case 'finalSet': {
+      const f = state.final;
+      if (state.phase !== 'final') return null;
+      const { qIndex, player, answerIndex } = cmd;
+      if (!isTeam(player) || !f.questions[qIndex] || f.entries[player][qIndex] !== null) return null;
+      if (answerIndex !== null) {
+        if (!f.questions[qIndex].answers[answerIndex]) return null;
+        const other = f.entries[1 - player][qIndex];
+        if (other && other.answerIndex === answerIndex) return null;
+      }
+      f.entries[player][qIndex] = { answerIndex };
+      if (answerIndex === null) return { type: 'final-miss', qIndex, player };
+      f.sum += f.questions[qIndex].answers[answerIndex].points;
+      if (!f.won && f.sum >= 200) {
+        f.won = true;
+        return { type: 'final-win' };
+      }
+      return { type: 'final-reveal', qIndex, player };
+    }
+    case 'finalClear': {
+      const f = state.final;
+      if (state.phase !== 'final') return null;
+      const entry = f?.entries[cmd.player]?.[cmd.qIndex];
+      if (!entry) return null;
+      if (entry.answerIndex !== null) {
+        f.sum -= f.questions[cmd.qIndex].answers[entry.answerIndex].points;
+      }
+      f.entries[cmd.player][cmd.qIndex] = null;
+      f.won = f.sum >= 200;
+      return null;
+    }
+    case 'timerStart': {
+      if (state.phase !== 'final' || !Number.isInteger(cmd.seconds) || cmd.seconds <= 0) return null;
+      state.final.timer = { duration: cmd.seconds, startedAt: cmd.now };
+      return { type: 'timer-start' };
+    }
+    case 'timerStop': {
+      if (state.phase !== 'final' || !state.final.timer) return null;
+      state.final.timer = null;
+      return null;
+    }
+    case 'repeatBuzzer':
+      return { type: 'repeat' };
+    case 'introStart': {
+      state.intro = 'video';
+      return { type: 'intro' };
+    }
+    case 'introVideoEnded': {
+      if (state.intro !== 'video') return null;
+      state.intro = 'music';
+      return null;
+    }
+    case 'stopMusic': {
+      state.intro = 'off';
+      return null;
+    }
+    case 'endGame': {
+      state.phase = 'gameover';
+      state.round = null;
+      return { type: 'game-over' };
+    }
+    case 'newGame': {
+      Object.assign(state, createGame(state.config));
+      return { type: 'new-game' };
+    }
     default:
       return null;
   }
