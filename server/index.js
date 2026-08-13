@@ -30,7 +30,11 @@ export async function startServer({ port, stateFile, questionsFile }) {
   app.get('/qr.svg', async (req, res) => {
     const data = String(req.query.data ?? '');
     if (!data) return res.status(400).send('brak parametru data');
-    res.type('image/svg+xml').send(await QRCode.toString(data, { type: 'svg', margin: 1 }));
+    try {
+      res.type('image/svg+xml').send(await QRCode.toString(data, { type: 'svg', margin: 1 }));
+    } catch {
+      res.status(400).send('nieprawidłowe dane QR');
+    }
   });
 
   const httpServer = createServer(app);
@@ -52,7 +56,13 @@ export async function startServer({ port, stateFile, questionsFile }) {
       if (msg?.type !== 'command' || typeof msg.cmd?.type !== 'string') return;
       const cmd = msg.cmd;
       if (cmd.type === 'timerStart') cmd.now = Date.now();
-      const event = apply(state, cmd);
+      let event;
+      try {
+        event = apply(state, cmd);
+      } catch (e) {
+        console.error('apply() rzuciło wyjątek, komenda odrzucona:', e);
+        return;
+      }
       const stateChanged = event !== null || wasSilentChange(cmd);
       if (!stateChanged) return;
       seq += 1;

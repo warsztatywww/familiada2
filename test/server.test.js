@@ -46,3 +46,25 @@ test('serwer: snapshot na wejściu, broadcast po komendzie, persystencja', async
   await srv2.close();
   rmSync(stateFile, { force: true });
 });
+
+test('serwer: /qr.svg z niepoprawnymi (za długimi) danymi zwraca 400 i nie ubija serwera', async () => {
+  const stateFile = 'test-state-qr.json';
+  rmSync(stateFile, { force: true });
+
+  const srv = await startServer({ port: 0, stateFile, questionsFile: 'questions.json' });
+  const port = srv.port;
+
+  const tooLong = 'a'.repeat(5001);
+  const badRes = await fetch(`http://127.0.0.1:${port}/qr.svg?data=${tooLong}`);
+  assert.equal(badRes.status, 400);
+  await badRes.text();
+
+  // serwer nadal odpowiada na kolejne, poprawne żądanie
+  const goodRes = await fetch(`http://127.0.0.1:${port}/qr.svg?data=http://example.com`);
+  assert.equal(goodRes.status, 200);
+  const body = await goodRes.text();
+  assert.match(body, /<svg/);
+
+  await srv.close();
+  rmSync(stateFile, { force: true });
+});
