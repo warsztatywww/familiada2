@@ -1,0 +1,113 @@
+{
+  "teams": ["Lewa", "Prawa"],
+  "rounds": [
+    {
+      "question": "Najlepszy język programowania",
+      "multiplier": 1,
+      "answers": [
+        { "text": "COBOL", "points": 34 },
+        { "text": "Nim", "points": 26 },
+        { "text": "Javascript", "points": 18 },
+        { "text": "PHP", "points": 12 },
+        { "text": "Haskell", "points": 10 }
+      ]
+    },
+    {
+      "question": "Imię męskie na literę \"O\"",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Oliwia", "points": 35 },
+        { "text": "Orlef", "points": 25 },
+        { "text": "Oliwier", "points": 20 },
+        { "text": "Pakosz", "points": 12 },
+        { "text": "Onufry", "points": 8 }
+      ]
+    },
+    {
+      "question": "Co może wciągnąć na WWW?",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Rzeka", "points": 38 },
+        { "text": "Factorio", "points": 28 },
+        { "text": "Warsztaty", "points": 18 },
+        { "text": "CTF", "points": 10 },
+        { "text": "Czarna dziura", "points": 6 }
+      ]
+    },
+    {
+      "question": "Co jest w kosmosie?",
+      "multiplier": 2,
+      "answers": [
+        { "text": "Boty", "points": 36 },
+        { "text": "Kot na keyboardzie", "points": 27 },
+        { "text": "Kwazary", "points": 19 },
+        { "text": "Etanol", "points": 11 },
+        { "text": "Czarne dziury", "points": 7 }
+      ]
+    },
+    {
+      "question": "Czym się kończy doktorat",
+      "multiplier": 3,
+      "answers": [
+        { "text": "Wykluczeniem", "points": 33 },
+        { "text": "Literą 't'", "points": 26 },
+        { "text": "Depresją", "points": 18 },
+        { "text": "Rozprawą", "points": 12 },
+        { "text": "Nie kończy się", "points": 7 },
+        { "text": "Postdocem", "points": 4 }
+      ]
+    }
+  ],
+  "final": [
+    {
+      "question": "Co panuje w kuchni?",
+      "answers": [
+        { "text": "Syf / burdel", "points": 40 },
+        { "text": "Muchy", "points": 30 },
+        { "text": "Upadek obyczajów", "points": 18 },
+        { "text": "Dyżurni", "points": 8 },
+        { "text": "Komunizm", "points": 4 }
+      ]
+    },
+    {
+      "question": "Co robią dyżurni?",
+      "answers": [
+        { "text": "Nic", "points": 35 },
+        { "text": "Śpią", "points": 28 },
+        { "text": "Dostają opieprz", "points": 19 },
+        { "text": "Kradną ser", "points": 12 },
+        { "text": "Zwalają robotę na następnych", "points": 6 }
+      ]
+    },
+    {
+      "question": "Czego brakuje na śniadaniu?",
+      "answers": [
+        { "text": "Ludzi", "points": 36 },
+        { "text": "Snu", "points": 27 },
+        { "text": "Dyżurnych", "points": 19 },
+        { "text": "Sera", "points": 11 },
+        { "text": "Talerzy", "points": 7 }
+      ]
+    },
+    {
+      "question": "Najlepsze na WWW",
+      "answers": [
+        { "text": "Oczywiście, że organizatorzy", "points": 38 },
+        { "text": "Internet", "points": 28 },
+        { "text": "Alkohol", "points": 18 },
+        { "text": "Rzutniki", "points": 10 },
+        { "text": "Tosty", "points": 6 }
+      ]
+    },
+    {
+      "question": "Co można spalić?",
+      "answers": [
+        { "text": "Korki", "points": 34 },
+        { "text": "Tosty", "points": 26 },
+        { "text": "Żart", "points": 20 },
+        { "text": "Chrust", "points": 12 },
+        { "text": "Czarownice", "points": 8 }
+      ]
+    }
+  ]
+}
