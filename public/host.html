@@ -51,6 +51,31 @@
       <button id="btn-steal-fail">PRZEJĘCIE: PUDŁO</button>
     </div>
   </section>
+
+  <section class="card" id="final-card" hidden>
+    <div class="row">
+      <button id="btn-timer-15">Start 15 s (gracz 1)</button>
+      <button id="btn-timer-20">Start 20 s (gracz 2)</button>
+      <button id="btn-timer-stop">Stop timera</button>
+      <button id="btn-repeat" class="danger">POWTÓRZONA!</button>
+      <span>SUMA FINAŁU: <strong id="final-sum-host">0</strong>/200</span>
+    </div>
+    <div id="final-questions"></div>
+  </section>
+
+  <section class="card" id="fix-card">
+    <details>
+      <summary>Korekty (banki, nazwy drużyn)</summary>
+      <div class="row" data-team="0">
+        <input class="name-input" maxlength="20"> <input class="bank-input" type="number" min="0">
+        <button class="btn-apply">Zapisz</button>
+      </div>
+      <div class="row" data-team="1">
+        <input class="name-input" maxlength="20"> <input class="bank-input" type="number" min="0">
+        <button class="btn-apply">Zapisz</button>
+      </div>
+    </details>
+  </section>
 </main>
 
 <footer id="bottombar">

@@ -59,6 +59,41 @@ function render(state) {
   $('#btn-final').disabled = state.config.final.length !== 5;
   $('#btn-prev-round').disabled = !inRound || state.roundIndex === 0;
   $('#btn-next-round').disabled = inRound && state.roundIndex >= state.config.rounds.length - 1;
+
+  const f = state.final;
+  $('#final-card').hidden = state.phase !== 'final';
+  if (state.phase === 'final') {
+    $('#final-sum-host').textContent = f.sum;
+    $('#final-questions').innerHTML = f.questions.map((q, qi) => {
+      const player = (p) => {
+        const entry = f.entries[p][qi];
+        const otherEntry = f.entries[1 - p][qi];
+        if (entry !== null) {
+          const label = entry.answerIndex === null
+            ? 'PUDŁO (0 pkt)'
+            : `${q.answers[entry.answerIndex].text} (${q.answers[entry.answerIndex].points})`;
+          return `<div class="player"><span>Gracz ${p + 1}</span>` +
+            `<button class="chosen" data-clear data-q="${qi}" data-p="${p}">${label} — cofnij</button></div>`;
+        }
+        const buttons = q.answers.map((a, ai) => {
+          const used = otherEntry && otherEntry.answerIndex === ai;
+          return `<button data-q="${qi}" data-p="${p}" data-a="${ai}" class="${used ? 'used' : ''}" ${used ? 'disabled' : ''}>${a.text} (${a.points})</button>`;
+        }).join('');
+        return `<div class="player"><span>Gracz ${p + 1}</span>${buttons}` +
+          `<button data-q="${qi}" data-p="${p}" data-a="null">PUDŁO — 0 pkt</button></div>`;
+      };
+      return `<div class="final-q"><h4>${qi + 1}. ${q.question}</h4><div class="players">${player(0)}${player(1)}</div></div>`;
+    }).join('');
+  }
+
+  // korekty
+  for (const row of document.querySelectorAll('#fix-card .row')) {
+    const t = Number(row.dataset.team);
+    if (document.activeElement?.closest('.row') !== row) {
+      row.querySelector('.name-input').value = state.teams[t].name;
+      row.querySelector('.bank-input').value = state.teams[t].bank;
+    }
+  }
 }
 
 // --- akcje ---
@@ -103,3 +138,25 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'ArrowLeft') $('#btn-prev-round').click();
   else if (e.key === 'ArrowRight') $('#btn-next-round').click();
 });
+
+// --- finał i korekty ---
+$('#final-questions').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const qIndex = Number(btn.dataset.q);
+  const player = Number(btn.dataset.p);
+  if (btn.hasAttribute('data-clear')) return send({ type: 'finalClear', qIndex, player });
+  const answerIndex = btn.dataset.a === 'null' ? null : Number(btn.dataset.a);
+  send({ type: 'finalSet', qIndex, player, answerIndex });
+});
+$('#btn-timer-15').onclick = () => send({ type: 'timerStart', seconds: 15 });
+$('#btn-timer-20').onclick = () => send({ type: 'timerStart', seconds: 20 });
+$('#btn-timer-stop').onclick = () => send({ type: 'timerStop' });
+$('#btn-repeat').onclick = () => send({ type: 'repeatBuzzer' });
+for (const row of document.querySelectorAll('#fix-card .row')) {
+  const t = Number(row.dataset.team);
+  row.querySelector('.btn-apply').onclick = () => {
+    send({ type: 'setTeamName', team: t, name: row.querySelector('.name-input').value });
+    send({ type: 'setBank', team: t, value: Number(row.querySelector('.bank-input').value) });
+  };
+}
