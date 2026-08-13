@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Familiada</title>
+<style>
+  :root { --bg:#111318; --card:#1a1e26; --border:#2a2f3a; --text:#e8eaf0; --muted:#8a93a5; --accent:#ffb300; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; display: grid; place-content: center; gap: 24px; padding: 24px; }
+  h1 { text-align: center; letter-spacing: 0.3em; color: var(--accent); font-weight: 800; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; max-width: 1100px; }
+  a.tile { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; color: var(--text); text-decoration: none; display: grid; gap: 12px; }
+  a.tile:hover { border-color: var(--accent); }
+  .tile img { width: 160px; height: 160px; background: #fff; padding: 8px; border-radius: 8px; justify-self: center; }
+  .tile .url { color: var(--muted); font-size: 13px; word-break: break-all; }
+</style>
+</head>
+<body>
+<h1>FAMILIADA</h1>
+<div class="tiles" id="tiles"></div>
+<script>
+  const views = [
+    ['Tablica (projektor)', '/board'],
+    ['Panel prowadzącego', '/host'],
+    ['Buzzer — drużyna lewa', '/buzzer/1'],
+    ['Buzzer — drużyna prawa', '/buzzer/2'],
+  ];
+  document.getElementById('tiles').innerHTML = views.map(([name, path]) => {
+    const url = location.origin + path;
+    return `<a class="tile" href="${path}"><strong>${name}</strong>` +
+      `<img src="/qr.svg?data=${encodeURIComponent(url)}" alt="QR"><span class="url">${url}</span></a>`;
+  }).join('');
+</script>
+</body>
+</html>
