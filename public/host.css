@@ -4,6 +4,9 @@
   --team0: #3d8bfd; --team1: #ff4d4d;
 }
 * { box-sizing: border-box; margin: 0; }
+/* .card ustawia display: grid bezwarunkowo, co przebiłoby domyślne
+   [hidden] { display: none } — wymuszamy jawnie (patrz też board.css). */
+[hidden] { display: none !important; }
 body {
   background: var(--bg); color: var(--text);
   font-family: system-ui, sans-serif;
