@@ -12,7 +12,7 @@ test('serwer: snapshot na wejściu, broadcast po komendzie, persystencja', async
   const stateFile = 'test-state.json';
   rmSync(stateFile, { force: true });
 
-  const srv1 = await startServer({ port: 0, stateFile, questionsPath: 'questions' });
+  const srv1 = await startServer({ port: 0, stateFile, questionsPath: 'test/fixtures/questions.json' });
   const port = srv1.port;
 
   const a = new WebSocket(`ws://127.0.0.1:${port}`);
@@ -38,7 +38,7 @@ test('serwer: snapshot na wejściu, broadcast po komendzie, persystencja', async
   await srv1.close();
 
   // restart wznawia stan z pliku
-  const srv2 = await startServer({ port: 0, stateFile, questionsPath: 'questions' });
+  const srv2 = await startServer({ port: 0, stateFile, questionsPath: 'test/fixtures/questions.json' });
   const c = new WebSocket(`ws://127.0.0.1:${srv2.port}`);
   const resumed = await nextMessage(c);
   assert.equal(resumed.state.phase, 'round');
@@ -51,7 +51,7 @@ test('serwer: uszkodzona ramka WS nie ubija procesu', async () => {
   const stateFile = 'test-state-ws-garbage.json';
   rmSync(stateFile, { force: true });
 
-  const srv = await startServer({ port: 0, stateFile, questionsPath: 'questions' });
+  const srv = await startServer({ port: 0, stateFile, questionsPath: 'test/fixtures/questions.json' });
   const port = srv.port;
 
   const ws = new WebSocket(`ws://127.0.0.1:${port}`);
@@ -72,7 +72,7 @@ test('serwer: uszkodzona ramka WS nie ubija procesu', async () => {
 test('serwer: undo/redo przywraca stan i rozsyła etykiety', async () => {
   const stateFile = 'test-state-undo.json';
   rmSync(stateFile, { force: true });
-  const srv = await startServer({ port: 0, stateFile, questionsPath: 'questions' });
+  const srv = await startServer({ port: 0, stateFile, questionsPath: 'test/fixtures/questions.json' });
   const ws = new WebSocket(`ws://127.0.0.1:${srv.port}`);
   const send = (cmd) => ws.send(JSON.stringify({ type: 'command', cmd }));
   const first = await nextMessage(ws);
@@ -127,7 +127,7 @@ test('serwer: undo/redo przywraca stan i rozsyła etykiety', async () => {
 test('serwer: repeatBuzzer w finale rozgłasza event, ale nie zaśmieca stosu undo', async () => {
   const stateFile = 'test-state-repeat.json';
   rmSync(stateFile, { force: true });
-  const srv = await startServer({ port: 0, stateFile, questionsPath: 'questions' });
+  const srv = await startServer({ port: 0, stateFile, questionsPath: 'test/fixtures/questions.json' });
   const ws = new WebSocket(`ws://127.0.0.1:${srv.port}`);
   const send = (cmd) => ws.send(JSON.stringify({ type: 'command', cmd }));
   await nextMessage(ws); // snapshot startowy
@@ -208,7 +208,7 @@ test('serwer: /qr.svg z niepoprawnymi (za długimi) danymi zwraca 400 i nie ubij
   const stateFile = 'test-state-qr.json';
   rmSync(stateFile, { force: true });
 
-  const srv = await startServer({ port: 0, stateFile, questionsPath: 'questions' });
+  const srv = await startServer({ port: 0, stateFile, questionsPath: 'test/fixtures/questions.json' });
   const port = srv.port;
 
   const tooLong = 'a'.repeat(5001);

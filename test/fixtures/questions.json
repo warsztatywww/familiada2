@@ -1,0 +1,27 @@
+{
+  "teams": ["Lewa", "Prawa"],
+  "rounds": [
+    {
+      "question": "Pytanie testowe 1",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Odpowiedź A", "points": 60 },
+        { "text": "Odpowiedź B", "points": 40 }
+      ]
+    },
+    {
+      "question": "Pytanie testowe 2",
+      "multiplier": 2,
+      "answers": [
+        { "text": "Odpowiedź C", "points": 100 }
+      ]
+    }
+  ],
+  "final": [
+    { "question": "Finał 1", "answers": [{ "text": "F1", "points": 30 }] },
+    { "question": "Finał 2", "answers": [{ "text": "F2", "points": 25 }] },
+    { "question": "Finał 3", "answers": [{ "text": "F3", "points": 20 }] },
+    { "question": "Finał 4", "answers": [{ "text": "F4", "points": 15 }] },
+    { "question": "Finał 5", "answers": [{ "text": "F5", "points": 10 }] }
+  ]
+}
