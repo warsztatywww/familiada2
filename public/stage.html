@@ -19,7 +19,7 @@
   body {
     color: var(--text);
     font-family: system-ui, sans-serif;
-    display: grid; grid-template-rows: auto 1fr auto auto;
+    display: grid; grid-template-rows: auto 1fr auto auto auto;
     user-select: none; -webkit-user-select: none;
     background:
       radial-gradient(70vw 30vh at 0% 0%, rgba(194, 50, 42, 0.12), transparent 60%),
@@ -56,6 +56,10 @@
   }
   #status.team-0 { background: var(--team0); color: #fff; }
   #status.team-1 { background: var(--team1); color: #fff; }
+  #hint {
+    padding: 2vw 4vw; font-size: 2.4vw; line-height: 1.5; text-align: center;
+    color: var(--muted); border-top: 1px solid var(--line);
+  }
   #huddle {
     padding: 3vw; font-size: 4.5vw; font-weight: 800; text-align: center;
     background: var(--amber); color: var(--bg);
@@ -76,6 +80,7 @@
   <div id="question" class="muted">Czekamy na rozpoczęcie…</div>
   <ol id="final" hidden></ol>
 </main>
+<div id="hint" hidden></div>
 <div id="huddle" hidden></div>
 <div id="status"></div>
 <script src="/common/NoSleep.min.js"></script>
@@ -87,6 +92,25 @@
   const finalEl = document.getElementById('final');
   const statusEl = document.getElementById('status');
   const huddleEl = document.getElementById('huddle');
+  const hintEl = document.getElementById('hint');
+
+  // Ściąga zasad dla prowadzącego — inna dla każdego etapu gry
+  const HINTS = {
+    buzzers: 'Przeczytaj pytanie — odpowiada ten, kto pierwszy wbije się na buzzer. '
+      + 'Pudło = szansa dla drugiej drużyny. Wyżej trafiona odpowiedź wybiera: gramy albo oddajemy.',
+    play: 'Pytaj kolejno graczy drużyny. Pudło = duży X. '
+      + 'Po 2. X przeciwnicy zaczynają naradę, po 3. X — przejęcie.',
+    steal: 'Kapitan przeciwników podaje jedną wspólną odpowiedź. '
+      + 'Trafiona — zabierają całą pulę, pudło — pula zostaje u grających.',
+    done: 'Odczytaj z tablicy nieodkryte odpowiedzi, potem zapowiedz następną rundę.',
+    final: 'Gracz 1: 5 pytań w 15 s. Potem zakrywamy tablicę i wchodzi gracz 2: 20 s; '
+      + 'powtórzona odpowiedź = sygnał „POWTÓRZONA!”, gracz podaje inną. 200 pkt = wygrany finał.',
+  };
+
+  function setHint(text) {
+    hintEl.textContent = text || '';
+    hintEl.hidden = !text;
+  }
 
   function setQuestion(text, muted) {
     questionEl.textContent = text;
@@ -109,6 +133,7 @@
     if (huddle) huddleEl.textContent = `💬 ${teams[1 - round.playingTeam].name} zaczyna naradę!`;
     roundMetaEl.hidden = state.phase !== 'round';
     if (state.phase === 'round') {
+      setHint(HINTS[round.stage]);
       // prowadzący musi wiedzieć, kiedy zapowiedzieć "punkty razy dwa/trzy"
       roundMetaEl.textContent =
         `Runda ${state.roundIndex + 1}/${state.config.rounds.length} • punkty x${round.multiplier}`;
@@ -126,6 +151,7 @@
         setStatus('Runda zakończona');
       }
     } else if (state.phase === 'final') {
+      setHint(HINTS.final);
       setQuestion('', false);
       finalEl.replaceChildren(...state.final.questions.map((q) => {
         const li = document.createElement('li');
@@ -134,6 +160,7 @@
       }));
       setStatus('FINAŁ');
     } else {
+      setHint('');
       setQuestion('Czekamy na rozpoczęcie…', true);
       setStatus('');
     }
