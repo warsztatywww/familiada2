@@ -1,4 +1,5 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import path from 'node:path';
 
 function fail(msg) {
   throw new Error(`Błąd w pliku pytań: ${msg}`);
@@ -53,4 +54,29 @@ export function loadQuestions(path) {
     fail(`niepoprawny JSON (${e.message})`);
   }
   return validateQuestions(data);
+}
+
+// Ładuje zestawy pytań: katalog → każdy plik *.json to jeden zestaw
+// (kolejność alfabetyczna po nazwie pliku), pojedynczy plik → jeden zestaw.
+// id zestawu = nazwa pliku bez rozszerzenia; siedzi w config.id, więc trafia
+// do stanu gry i identyfikuje aktywny zestaw po restarcie/undo.
+export function loadQuestionSets(questionsPath) {
+  let isDir;
+  try {
+    isDir = statSync(questionsPath).isDirectory();
+  } catch {
+    fail(`nie mogę odczytać ${questionsPath}`);
+  }
+  const files = isDir
+    ? readdirSync(questionsPath).filter((f) => f.endsWith('.json')).sort()
+        .map((f) => path.join(questionsPath, f))
+    : [questionsPath];
+  if (files.length === 0) fail(`katalog ${questionsPath} nie zawiera żadnego pliku *.json z pytaniami`);
+  return files.map((file) => {
+    try {
+      return { id: path.basename(file, '.json'), ...loadQuestions(file) };
+    } catch (e) {
+      throw new Error(`${path.basename(file)}: ${e.message}`);
+    }
+  });
 }

@@ -34,7 +34,7 @@ Zmienne środowiskowe (opcjonalne, z wartościami domyślnymi):
 |-----------------|-------------------|-------------------------------------|
 | `PORT`          | `3000`            | port HTTP/WS serwera                |
 | `STATE_FILE`    | `state.json`      | plik z zapisanym stanem gry         |
-| `QUESTIONS_FILE`| `questions.json`  | plik z pytaniami (patrz niżej)      |
+| `QUESTIONS_PATH`| `questions`       | katalog z zestawami pytań albo pojedynczy plik (patrz niżej) |
 
 **Uwaga o sieci:** wszystkie urządzenia (laptop z serwerem, projektor,
 reżyserka, buzzery) muszą być w **tej samej sieci lokalnej** (np. ten sam
@@ -78,7 +78,9 @@ Skróty są nieaktywne, gdy fokus jest w polu tekstowym (np. w sekcji
 - **Finał** — start rundy finałowej (aktywny tylko, gdy plik pytań ma
   dokładnie 5 pytań finałowych).
 - **Koniec gry** — przechodzi do ekranu wyników na tablicy.
-- **Nowa gra** — zeruje banki i cały postęp (z potwierdzeniem).
+- **Nowa gra** — zeruje banki i cały postęp (z potwierdzeniem). Gdy w
+  katalogu `questions/` jest więcej niż jeden zestaw pytań, obok przycisku
+  pojawia się lista wyboru zestawu na nową grę (pokazuje aktywny zestaw).
 - W sekcji finału: **Start 15 s / 20 s** uruchamia timer gracza, **Stop
   timera** go zatrzymuje, **POWTÓRZONA!** sygnalizuje odpowiedź do
   powtórzenia (dźwięk błędu, bez zmiany stanu).
@@ -94,10 +96,16 @@ Ekran dotykowy: szare „CZEKAJ" gdy runda nie jest aktywna, kolorowe
 pierwsza, „SPÓŹNIONY" dla drugiej. Ekran nie gaśnie w trakcie gry (Wake
 Lock, jeśli przeglądarka wspiera).
 
-## Plik pytań
+## Pliki pytań (zestawy)
 
-Domyślnie serwer czyta `questions.json` z katalogu głównego (ścieżkę można
-zmienić zmienną `QUESTIONS_FILE`). Struktura:
+Domyślnie serwer czyta wszystkie pliki `*.json` z katalogu `questions/` —
+każdy plik to jeden **zestaw pytań**. Zestawy są sortowane alfabetycznie po
+nazwie pliku; pierwszy z listy jest aktywny po starcie od zera. Nazwa pliku
+(bez `.json`) jest widoczna jako nazwa zestawu w reżyserce, więc kolejność
+można wymusić prefiksem (`01-firma.json`, `02-rodzina.json`). Zestaw zmienia
+się przy starcie **nowej gry** w reżyserce. Ścieżkę można zmienić zmienną
+`QUESTIONS_PATH` (katalog albo pojedynczy plik — wtedy jest tylko jeden
+zestaw, a lista wyboru w reżyserce się nie pokazuje). Struktura pliku:
 
 ```json
 {
@@ -152,15 +160,17 @@ Wystarczy jedno kliknięcie/dotknięcie ekranu tablicy zaraz po załadowaniu
 Stan gry jest zapisywany do `state.json` po każdej zmianie. Serwer można
 bezpiecznie zabić (Ctrl+C) i uruchomić ponownie w dowolnym momencie —
 `npm start` wczyta ostatni zapisany stan i gra wraca dokładnie w to samo
-miejsce (pytania są wtedy wczytywane na nowo z `questions.json`, reszta
-stanu z `state.json`). Wszystkie podłączone widoki (tablica, reżyserka,
+miejsce (pytania aktywnego zestawu są wtedy wczytywane na nowo z pliku w
+`questions/`, reszta stanu z `state.json`; jeśli plik zestawu zniknął,
+serwer bierze pierwszy z listy). Wszystkie podłączone widoki (tablica, reżyserka,
 buzzery) same się przełączają w tryb łączenia i wracają po ponownym
 starcie serwera — nic nie trzeba ręcznie odświeżać.
 
-Aby zacząć zupełnie od zera (np. inna gra, inny plik pytań), skasuj
+Aby zacząć zupełnie od zera (np. inna gra, inny zestaw pytań), użyj
+przycisku **„Nowa gra"** w reżyserce (z wyborem zestawu), bez restartu
+serwera. Ten sam efekt (ze startem od pierwszego zestawu) daje skasowanie
 `state.json` przed uruchomieniem serwera — plik jest ignorowany przez git
-(`.gitignore`), więc nie trzeba tego cofać w repo. Ten sam efekt daje
-przycisk **„Nowa gra"** w reżyserce, bez restartu serwera.
+(`.gitignore`), więc nie trzeba tego cofać w repo.
 
 ## Smoke test
 

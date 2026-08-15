@@ -8,7 +8,7 @@ import { networkInterfaces } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import QRCode from 'qrcode';
-import { loadQuestions } from './questions.js';
+import { loadQuestionSets } from './questions.js';
 import { createGame, apply } from './game.js';
 import { createHistory, describeCommand } from './history.js';
 
@@ -33,22 +33,25 @@ function loadOrCreateCert(dir) {
   return { key: readFileSync(keyFile), cert: readFileSync(certFile) };
 }
 
-export async function startServer({ port, httpsPort, stateFile, questionsFile }) {
-  const config = loadQuestions(questionsFile);
+export async function startServer({ port, httpsPort, stateFile, questionsPath }) {
+  const sets = loadQuestionSets(questionsPath);
+  const setById = new Map(sets.map((s) => [s.id, s]));
+  // pytania zawsze świeże z pliku; skasowany/nieznany zestaw → pierwszy z listy
+  const freshConfig = (id) => setById.get(id) ?? sets[0];
 
   let state;
   let restored = false;
   if (existsSync(stateFile)) {
     try {
       state = JSON.parse(readFileSync(stateFile, 'utf8'));
-      state.config = config; // pytania zawsze świeże z pliku
+      state.config = freshConfig(state.config?.id);
       restored = true;
     } catch (e) {
       console.error('state.json uszkodzony lub nieczytelny — skasuj plik albo przywróć kopię. Startuję nową grę.');
     }
   }
   if (!restored) {
-    state = createGame(config);
+    state = createGame(sets[0]);
   }
 
   let seq = 0;
@@ -83,9 +86,11 @@ export async function startServer({ port, httpsPort, stateFile, questionsFile })
     });
   }
 
+  const setIds = sets.map((s) => s.id);
+
   function snapshot(event) {
     return JSON.stringify({
-      type: 'state', seq, now: Date.now(), event, state,
+      type: 'state', seq, now: Date.now(), event, state, sets: setIds,
       undoLabel: history.undoLabel(), redoLabel: history.redoLabel(),
     });
   }
@@ -120,13 +125,16 @@ export async function startServer({ port, httpsPort, stateFile, questionsFile })
         if (!snap) return;
         const volume = state.volume;
         state = snap;
-        state.config = config; // pytania zawsze świeże, jak przy wczytaniu z pliku
+        state.config = freshConfig(state.config?.id); // pytania zawsze świeże, jak przy wczytaniu z pliku
         state.volume = volume; // głośność to ustawienie sali — undo jej nie cofa
         broadcast(null);
         return;
       }
       if (cmd.type === 'timerStart') cmd.now = Date.now();
       const before = structuredClone(state);
+      // Zmiana zestawu pytań: podmiana configu po zrzucie 'before' (undo ma
+      // przywrócić stary zestaw), przed apply() — newGame startuje już z nowym.
+      if (cmd.type === 'newGame' && setById.has(cmd.setId)) state.config = setById.get(cmd.setId);
       let event;
       try {
         event = apply(state, cmd);
@@ -204,7 +212,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const srv = await startServer({
       port,
       stateFile: process.env.STATE_FILE ?? 'state.json',
-      questionsFile: process.env.QUESTIONS_FILE ?? 'questions.json',
+      // ścieżka może być katalogiem (wiele zestawów) albo jednym plikiem
+      questionsPath: process.env.QUESTIONS_PATH ?? process.env.QUESTIONS_FILE ?? 'questions',
     });
     console.log('Familiada wystartowała. Otwórz (start: linki + QR):');
     for (const host of ['localhost', ...lanAddresses()]) {

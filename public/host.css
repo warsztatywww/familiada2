@@ -92,6 +92,16 @@ button:hover:not(:disabled) { border-color: var(--amber); }
 button:active:not(:disabled) { transform: translateY(1px); }
 button:disabled { opacity: 0.3; cursor: default; }
 button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+select {
+  min-height: 52px; padding: 8px 12px; max-width: 220px;
+  font: 600 15px/1.25 system-ui, sans-serif;
+  color: var(--text);
+  background: #1c2230;
+  border: 1px solid var(--line); border-radius: 10px;
+  cursor: pointer;
+}
+select:hover { border-color: var(--amber); }
+select:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 button.danger { background: linear-gradient(#3a1a17, #2c1412); border-color: #7a2a1f; }
 button.danger:hover:not(:disabled) { border-color: #c2322a; }
 

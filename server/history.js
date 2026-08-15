@@ -50,7 +50,7 @@ export function describeCommand(cmd, state) {
     case 'repeatBuzzer': return 'powtórzona';
     case 'introStart': return 'intro';
     case 'stopMusic': return 'stop muzyki';
-    case 'newGame': return 'nowa gra';
+    case 'newGame': return cmd.setId ? `nowa gra (${cmd.setId})` : 'nowa gra';
     default: return cmd.type;
   }
 }

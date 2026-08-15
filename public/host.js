@@ -118,6 +118,19 @@ function render(msg) {
     }
   }
 
+  // zestaw pytań na nową grę — lista z serwera, wartość podąża za aktywnym
+  // zestawem (nie nadpisuj, gdy prowadzący właśnie wybiera); przy jednym
+  // zestawie select jest schowany
+  const setSel = $('#set-select');
+  const setsKey = JSON.stringify(msg.sets);
+  if (setSel.dataset.sets !== setsKey) {
+    setSel.dataset.sets = setsKey;
+    setSel.innerHTML = '';
+    for (const id of msg.sets) setSel.append(new Option(id, id));
+  }
+  if (document.activeElement !== setSel) setSel.value = state.config.id;
+  setSel.hidden = msg.sets.length < 2;
+
   // undo/redo
   const undoBtn = $('#btn-undo');
   undoBtn.disabled = !msg.undoLabel;
@@ -154,7 +167,11 @@ $('#btn-prev-round').onclick = () => send({ type: 'newRound', roundIndex: curren
 $('#btn-next-round').onclick = () =>
   send({ type: 'newRound', roundIndex: current.state.phase === 'round' ? current.state.roundIndex + 1 : 0 });
 $('#btn-new-game').onclick = () => {
-  if (confirm('Na pewno zacząć NOWĄ GRĘ? Banki i postęp zostaną wyzerowane.')) send({ type: 'newGame' });
+  const setId = $('#set-select').value;
+  const withSet = current.sets.length > 1 ? ` z zestawem „${setId}”` : '';
+  if (confirm(`Na pewno zacząć NOWĄ GRĘ${withSet}? Banki i postęp zostaną wyzerowane.`)) {
+    send({ type: 'newGame', setId });
+  }
 };
 $('#btn-final').onclick = () => send({ type: 'startFinal' });
 
