@@ -1,0 +1,91 @@
+{
+  "teams": ["Lewa", "Prawa"],
+  "rounds": [
+    {
+      "question": "O czym były Flashki?",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Stardust", "points": 30 },
+        { "text": "Ballada o kebabie", "points": 23 },
+        { "text": "Łapanie pokemona", "points": 18 },
+        { "text": "Bomby atomowe", "points": 12 },
+        { "text": "Lotnictwo", "points": 10 },
+        { "text": "Komunikacja z satelitami", "points": 7 }
+      ]
+    },
+    {
+      "question": "Na Walcusiu robi się:",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Parówki", "points": 33 },
+        { "text": "Vege parówki", "points": 21 },
+        { "text": "Bułki", "points": 16 },
+        { "text": "Marchewki", "points": 12 },
+        { "text": "Salami", "points": 10 },
+        { "text": "Wszystko", "points": 8 }
+      ]
+    },
+    {
+      "question": "Co panuje w kuchni?",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Syf", "points": 36 },
+        { "text": "Muchy", "points": 22 },
+        { "text": "Dyżurni", "points": 15 },
+        { "text": "Walcuś", "points": 11 },
+        { "text": "Komunizm", "points": 9 },
+        { "text": "Eksterminator", "points": 7 }
+      ]
+    },
+    {
+      "question": "Jak się dobudzić na warsztaty?",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Skutecznie", "points": 26 },
+        { "text": "Budzeniem Karoliny", "points": 21 },
+        { "text": "Bieganiem", "points": 18 },
+        { "text": "Kawą", "points": 14 },
+        { "text": "Herbatą", "points": 12 },
+        { "text": "Iść wcześnie spać", "points": 9 }
+      ]
+    },
+    {
+      "question": "Wymień etap budowy prysznica?",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Trytytkowanie", "points": 25 },
+        { "text": "Żwirowanie", "points": 20 },
+        { "text": "Spawanie", "points": 17 },
+        { "text": "Malowanie", "points": 15 },
+        { "text": "Szlifowanie", "points": 13 },
+        { "text": "Podpinanie wody", "points": 10 }
+      ]
+    },
+    {
+      "question": "Jakiego Piotra można spotkać pod prysznicem?",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Piotr Gierek", "points": 24 },
+        { "text": "Piotr w kocich uszkach", "points": 19 },
+        { "text": "Inspektor Piotr", "points": 16 },
+        { "text": "Piotr który nie ufa spawom loczka", "points": 13 },
+        { "text": "Piotr bez twarzy", "points": 11 },
+        { "text": "Piotr drący się na Marcina", "points": 9 },
+        { "text": "Piotr nerd", "points": 8 }
+      ]
+    },
+    {
+      "question": "Co trzeba zrobić na koniec WWW?",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Wynieść prysznic w krzaki", "points": 29 },
+        { "text": "Wywieźć burdel do piwnicy", "points": 22 },
+        { "text": "Spakować majtki", "points": 17 },
+        { "text": "Zwinąć materace", "points": 13 },
+        { "text": "Posprzątać ławki i krzesła", "points": 11 },
+        { "text": "Znaleźć wszystkie narzędzia", "points": 8 }
+      ]
+    }
+  ],
+  "final": []
+}

@@ -19,9 +19,9 @@ test('odrzuca brak rund', () => {
   assert.throws(() => validateQuestions({ rounds: [] }), /rundy/i);
 });
 
-test('odrzuca > 6 odpowiedzi w rundzie', () => {
-  const answers = 'ABCDEFG'.split('').map((t) => ({ text: t, points: 1 }));
-  assert.throws(() => validateQuestions({ rounds: [{ question: 'Q', answers }] }), /6/);
+test('odrzuca > 7 odpowiedzi w rundzie', () => {
+  const answers = 'ABCDEFGH'.split('').map((t) => ({ text: t, points: 1 }));
+  assert.throws(() => validateQuestions({ rounds: [{ question: 'Q', answers }] }), /7/);
 });
 
 test('odrzuca finał inny niż 5 pytań', () => {

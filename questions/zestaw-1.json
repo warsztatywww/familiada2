@@ -1,0 +1,88 @@
+{
+  "teams": ["Lewa", "Prawa"],
+  "rounds": [
+    {
+      "question": "Jakie pieczywo jest w kuchni?",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Chleb tostowy", "points": 32 },
+        { "text": "Bułki do hot-dogów", "points": 24 },
+        { "text": "Chleb pełnoziarnisty", "points": 17 },
+        { "text": "Chleb prywatny", "points": 12 },
+        { "text": "Zasuszony chleb", "points": 9 },
+        { "text": "Nie ma, chleb się skończył", "points": 6 }
+      ]
+    },
+    {
+      "question": "Wegetarianom nie przysługuje:",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Surówka", "points": 41 },
+        { "text": "Krokiet", "points": 28 },
+        { "text": "Ziemniaki", "points": 19 },
+        { "text": "Mięso", "points": 12 }
+      ]
+    },
+    {
+      "question": "Dobry tost potrzebuje:",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Cegły naciskowej", "points": 29 },
+        { "text": "Sera", "points": 23 },
+        { "text": "Chleba tostowego", "points": 18 },
+        { "text": "Wędliny/Salami", "points": 14 },
+        { "text": "Sosu", "points": 10 },
+        { "text": "Chocofini", "points": 6 }
+      ]
+    },
+    {
+      "question": "Jaka muzyka gra podczas Frisbee?",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Nie gra bo budowa zmieniła na metal", "points": 34 },
+        { "text": "Ocenzurowana", "points": 22 },
+        { "text": "Skolim", "points": 16 },
+        { "text": "Kutas records", "points": 13 },
+        { "text": "Metallica", "points": 9 },
+        { "text": "Disco polo", "points": 6 }
+      ]
+    },
+    {
+      "question": "Pod prysznicem można znaleźć",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Inspektora Piotra", "points": 27 },
+        { "text": "Bagno", "points": 21 },
+        { "text": "Trytytki", "points": 18 },
+        { "text": "Żwirek", "points": 14 },
+        { "text": "Wkręty", "points": 11 },
+        { "text": "Białą włókninę", "points": 9 }
+      ]
+    },
+    {
+      "question": "Co robią dyżurni?",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Nic", "points": 31 },
+        { "text": "Śpią", "points": 24 },
+        { "text": "Dostają opieprz", "points": 17 },
+        { "text": "Siedzą w więzieniu", "points": 12 },
+        { "text": "Zostawiają naczynia w łazience", "points": 9 },
+        { "text": "Zapominają o wynoszeniu śmieci", "points": 7 }
+      ]
+    },
+    {
+      "question": "Co jest w WWWIPowni?",
+      "multiplier": 1,
+      "answers": [
+        { "text": "Skrzynka", "points": 28 },
+        { "text": "Rura", "points": 22 },
+        { "text": "Wąż ogrodowy", "points": 17 },
+        { "text": "Zraszacz", "points": 13 },
+        { "text": "Taśma ledowa", "points": 11 },
+        { "text": "Koło do wirowania", "points": 9 }
+      ]
+    }
+  ],
+  "final": []
+}

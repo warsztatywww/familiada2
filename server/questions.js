@@ -7,7 +7,7 @@ function fail(msg) {
 
 function validateAnswers(answers, where) {
   if (!Array.isArray(answers) || answers.length < 1) fail(`${where}: brak odpowiedzi`);
-  if (answers.length > 6) fail(`${where}: maksymalnie 6 odpowiedzi (jest ${answers.length})`);
+  if (answers.length > 7) fail(`${where}: maksymalnie 7 odpowiedzi (jest ${answers.length})`);
   return answers.map((a, i) => {
     if (typeof a?.text !== 'string' || !a.text.trim()) fail(`${where}, odpowiedź ${i + 1}: brak pola "text"`);
     if (!Number.isInteger(a.points) || a.points < 0) fail(`${where}, odpowiedź ${i + 1}: brak pola "points" (nieujemna liczba całkowita)`);

@@ -175,7 +175,7 @@ $('#btn-new-game').onclick = () => {
 };
 $('#btn-final').onclick = () => send({ type: 'startFinal' });
 
-// --- skróty klawiszowe: 1-6 odkryj, Q/W = X lewa/prawa, ←/→ rundy ---
+// --- skróty klawiszowe: 1-7 odkryj, Q/W = X lewa/prawa, ←/→ rundy ---
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !$('#fix-card').hidden) {
     $('#fix-card').hidden = true;
@@ -183,7 +183,7 @@ document.addEventListener('keydown', (e) => {
     return;
   }
   if (e.target.tagName === 'INPUT') return;
-  if (e.key >= '1' && e.key <= '6') {
+  if (e.key >= '1' && e.key <= '7') {
     send({ type: 'reveal', index: Number(e.key) - 1 });
   } else if (e.key === 'q' || e.key === 'Q') send({ type: 'strike', team: 0 });
   else if (e.key === 'w' || e.key === 'W') send({ type: 'strike', team: 1 });

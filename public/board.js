@@ -79,7 +79,7 @@ function handleEvent(event) {
 const COLS = 28;       // matryca rundy: nr(1)+odstęp(1)+tekst(22)+odstęp(1)+pkt(3)
 const TEXT_W = COLS - 6;
 const COLS_FINAL = 32; // finał: 2 × [tekst(12)+odstęp(1)+pkt(2)] + przerwa(2), punkty przy środku
-const ROWS = 8;        // 6 odpowiedzi + pusty wiersz + SUMA
+const ROWS = 8;        // 6 odpowiedzi + pusty wiersz + SUMA (przy 7 odpowiedziach pusty wiersz znika)
 
 const esc = (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] ?? c);
 const chars = (s) => [...s]; // spread zamiast split — polskie znaki spoza BMP też są 1 komórką
@@ -139,8 +139,10 @@ function answerLine(a, i, multiplier) {
 }
 
 function renderBoard(answers, sum, multiplier) {
-  const lines = Array.from({ length: 6 }, (_, i) => answerLine(answers[i], i, multiplier));
-  lines.push('', sumLine(sum, COLS));
+  const slots = answers.length > 6 ? 7 : 6;
+  const lines = Array.from({ length: slots }, (_, i) => answerLine(answers[i], i, multiplier));
+  if (slots === 6) lines.push('');
+  lines.push(sumLine(sum, COLS));
   setCells($('grid'), lines, COLS);
   setMini($('mini-round'), sum);
 }
